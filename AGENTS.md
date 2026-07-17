@@ -105,3 +105,29 @@ docker compose down -v  # Destruir todo
 - Archivos requeridos: `REQUIREMENTS.md`, `PLAN.md`, `TASKS.md`, `STATUS.md`
 - Nunca implementar sin PLAN.md aprobado
 - Cada tarea se marca "done" solo cuando su test pasa
+
+## Reglas Obligatorias: Diseño Anti-Vibe-Coded (Evitar Señales de IA Genérica)
+Para cualquier desarrollo del frontend en SvelteKit, el agente debe auditar y eliminar elementos que hagan que la aplicación se sienta "vibe-coded" (plantilla genérica generada por IA sin curación).
+
+### 1. Sistema de Color e Identidad
+- **PROHIBIDO**: Usar gradientes de fondo morados/violetas/azules sin propósito corporativo.
+- **PROHIBIDO**: Usar la paleta de colores por defecto de Tailwind sin calibración.
+- **REGLA**: Usar una escala de grises de fondo oscura calibrada (`#0d1425` o similar) con un único color de marca verde ecológico (`#10b981`) con propósito visual (CTAs, estados activos, badges de conexión exitosa).
+
+### 2. Estructura y Layout
+- **PROHIBIDO**: Usar el layout predecible de cuadrículas simétricas repetitivas en cada sección.
+- **REGLA**: Diseñar interfaces de software de escritorio utilitarias (SaaS robusto), priorizando tablas de datos densas, paneles laterales deslizables (slide-over) y tarjetas financieras claras con números grandes y legibles.
+
+### 3. Componentes y Botones
+- **PROHIBIDO**: Envolver todo en cards `rounded-2xl shadow-lg` idénticas.
+- **PROHIBIDO**: Usar iconos genéricos de decoración (Lucide cohete, rayo, etc.) sin relación lógica directa.
+- **REGLA**: Usar bordes semitransparentes finos (`border: 1px solid rgba(255,255,255,0.05)`) para el efecto de cristal (glassmorphism) sobre fondos oscuros. Los botones deben tener un estado hover suave y un indicador de carga real (no decorativo).
+
+### 4. Copy e Integridad Visual
+- **PROHIBIDO**: Textos en inglés o copy genérico de marketing SaaS ("Optimiza tu flujo de trabajo").
+- **REGLA**: Toda la interfaz debe estar en español técnico del negocio. El copy debe reflejar el problema exacto del POS (ej. "Historial de Compras Acumuladas", "Resumen de Caja del Período").
+
+### 5. Animaciones e Interacciones
+- **PROHIBIDO**: Animaciones de scroll excesivas, blobs de colores flotantes o movimientos innecesarios.
+- **REGLA**: Limitar las animaciones a micro-interacciones funcionales de la UI: efectos shimmer de carga (Skeleton Loaders), toasts de notificación que se deslizan brevemente y un pulso suave de conectividad en los estados de base de datos.
+
