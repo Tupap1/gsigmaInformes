@@ -41,7 +41,7 @@
 - [x] **T5.2** Comando `get_productos` → mismo archivo — Test: retorna lista de PAS con PASCOMP=1
 - [x] **T5.3** Vista informe con filtros y tabla → `src/routes/informes/+page.svelte` — Test: genera tabla con datos correctos
 - [x] **T5.4** Resumen de caja visual (tarjetas financieras) → mismo archivo — Test: cálculos coinciden con datos manuales
-- [ ] **T5.5** Generación PDF réplica con Previsualización y Diálogo de Guardado → `src/lib/pdf.ts` & `src/lib/components/PDFPreviewModal.svelte` — Test: PDF renderiza interactivo en modal, y diálogo de Tauri guarda el archivo en la ruta del usuario.
+- [ ] **T5.5** Generación PDF réplica y Diálogo de Guardado Nativo → `src/lib/pdf.ts` & `src/routes/informes/+page.svelte` — Test: hacer clic en "Exportar PDF" abre el diálogo de guardado de Windows y guarda el PDF en la ruta seleccionada.
 
 ## Fase 6: Auto-Updater + CI/CD
 - [ ] **T6.1** Generar keypair de firma → almacenar en GitHub Secrets — Test: `tauri signer generate` exitoso
