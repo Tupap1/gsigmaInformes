@@ -26,6 +26,7 @@
 - [x] **T3.5** Comando `create_proveedor` con transacción dual → mismo archivo — Test: crea en trc + proveedo, rollback si falla
 - [x] **T3.6** Comando `update_proveedor` con transacción → mismo archivo — Test: actualiza campos editables
 - [x] **T3.7** Comando `delete_proveedor` con borrado seguro → mismo archivo — Test: hard-delete sin compras, soft-delete con compras
+- [ ] **T3.8** Lógica de validación de NIT (DIAN Módulo 11) en Rust ➔ `src-tauri/src/utils/validation.rs` — Test: `cargo test test_nit_validation` valida casos válidos y erróneos
 
 ## Fase 4: Frontend SvelteKit — Layout y Proveedores
 - [x] **T4.1** Design system CSS (dark mode, variables, animaciones) → `src/app.css` — Test: visual review
@@ -35,6 +36,7 @@
 - [x] **T4.5** Vista lista de proveedores con búsqueda → `src/routes/proveedores/+page.svelte` — Test: lista carga, búsqueda filtra en tiempo real
 - [x] **T4.6** Formulario crear/editar proveedor → mismo archivo — Test: crear proveedor → aparece en lista
 - [x] **T4.7** Modal borrado seguro con feedback → mismo archivo — Test: soft/hard delete muestra mensaje correcto
+- [ ] **T4.8** Integración de validación de NIT colombiano en el formulario de creación/edición ➔ `src/routes/proveedores/+page.svelte` — Test: NITs inválidos muestran alerta en tiempo real y bloquean el envío.
 
 ## Fase 5: Informes + PDF
 - [x] **T5.1** Comandos Rust `get_compras_acumuladas` + `get_resumen_caja` → `src-tauri/src/commands/informes.rs` — Test: `cargo test` con datos seed

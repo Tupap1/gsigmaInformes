@@ -17,6 +17,7 @@ Se necesita migrar a una aplicación de escritorio nativa con Tauri que:
 - `POST /api/proveedores` — Creación transaccional en `adm.trc` + `pv.proveedo` con validación de duplicados
 - `PUT /api/proveedores/:id` — Actualización transaccional de datos no-financieros
 - `DELETE /api/proveedores/:id` — Borrado seguro (hard-delete si sin compras, soft-delete si tiene historial)
+- **Validación del NIT (DIAN)**: En la creación y edición de proveedores, si el documento es tipo NIT (`N`), se debe calcular y validar obligatoriamente su Dígito de Verificación (DV) mediante el algoritmo de Módulo 11 oficial de la DIAN colombiano (tanto en la UI como en el backend de Rust para consistencia).
 
 ### F2: Informe "Compras Acumuladas" (aún no implementado)
 - Filtro por rango de fechas
@@ -42,6 +43,7 @@ Se necesita migrar a una aplicación de escritorio nativa con Tauri que:
 - [x] Comando `delete_proveedor` implementa la lógica de borrado seguro idéntica
 - [x] Los pools de lectura y escritura están separados en Rust
 - [x] `cargo test` pasa con la BD Docker de desarrollo
+- [ ] Validación de NIT colombiano en Rust: Los comandos `create_proveedor` y `update_proveedor` calculan y validan que el Dígito de Verificación (DV) del NIT sea matemáticamente correcto antes de persistir, retornando error en caso contrario.
 
 ### CA3: Frontend SvelteKit
 - [x] Vista de lista de proveedores con búsqueda en tiempo real
@@ -49,6 +51,7 @@ Se necesita migrar a una aplicación de escritorio nativa con Tauri que:
 - [x] Modal de confirmación para borrado con feedback (hard/soft delete)
 - [x] Vista de informe interactivo en pantalla con filtros de fecha y desglose de caja
 - [x] Exportación de PDF utilizando el diálogo nativo de Windows ("Guardar Como") para seleccionar la ruta de destino
+- [ ] Validación de NIT colombiano: El formulario de proveedores calcula y valida automáticamente el Dígito de Verificación (DV) del NIT usando el algoritmo de Módulo 11 de la DIAN.
 - [ ] Diseño dark mode premium (glassmorphism, micro-animaciones)
 
 ### CA4: Auto-updater
