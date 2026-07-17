@@ -71,23 +71,28 @@ InformesRecicladora/
 
 ---
 
-## Fase 2: Conexión MySQL desde Rust
+## Fase 2: Conexión MySQL desde Rust (y Asistente de Configuración)
 
-### Archivos que se crean
-- `src-tauri/src/db.rs` — Configuración de pools con `sqlx::MySqlPool`
+### Archivos que se crean/modifican
+- `src-tauri/src/db.rs` — Configuración de pools con `sqlx::MySqlPool` y carga/escritura de `config.json` en AppData.
+- `src-tauri/src/commands/mod.rs` & `commands/db_init.rs` — Comando `setup_db_connection(host, port, root_password)` y `test_connection`.
 
 ### Lógica
-- Crear `read_pool` y `write_pool` con credenciales de `.env`
-- Manejar `mysql_native_password` para compatibilidad MySQL 5.5
-- Exponer un comando `test_connection` que retorne `{ read: bool, write: bool }`
-- Gestionar estado global con `tauri::State<AppState>`
+- **Archivo de Configuración:** En producción se buscará `config.json` en la ruta de AppData (`C:\Users\<User>\AppData\Roaming\com.recicladoraboyaca.informes\config.json`). Si no existe o la conexión falla, la app inicia en "Modo Configuración".
+- **Asistente Automático:** Al ingresar los datos de host, puerto y contraseña de `root`:
+  1. Conecta temporalmente a MySQL como `root`.
+  2. Crea las bases de datos si no existen.
+  3. Crea los usuarios restringidos `reci_read` (clave `read_pass_123`) y `reci_write` (clave `write_pass_123`) con sus respectivos GRANTs mínimos si no existen.
+  4. Ejecuta `FLUSH PRIVILEGES`.
+  5. Escribe el archivo `config.json` con el host, puerto y las credenciales restringidas (nunca guarda la clave de root en disco).
+  6. Levanta los pools definitivos de lectura/escritura y cambia el estado de la app a "Conectado".
+- Manejar `mysql_native_password` para compatibilidad MySQL 5.5.
+- Exponer un comando `test_connection` que retorne `{ read: bool, write: bool }` y `is_configured: bool`.
+- Gestionar estado global con `tauri::State<AppState>` mutando los pools de forma segura.
 
 ### Test de verificación
-- `cargo test` — test unitario que verifica que `read_pool` se conecta al Docker MySQL
-- Desde el frontend: `invoke('test_connection')` retorna `{ read: true, write: true }`
-
-### Decisión que necesita tu OK
-> **¿`sqlx` o `mysql_async`?** Recomiendo `sqlx` por su tipado seguro y soporte de migraciones, pero necesito confirmar que funcione con MySQL 5.5. Haré un spike (prueba rápida) como primer paso de esta fase.
+- `cargo test` — test unitario que verifica que la inicialización y el parser de `config.json` funcionan.
+- Simular flujo de creación de usuarios usando la contraseña de root de Docker (`devrootpassword`).
 
 ---
 
