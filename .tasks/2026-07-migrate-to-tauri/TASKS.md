@@ -37,11 +37,11 @@
 - [x] **T4.7** Modal borrado seguro con feedback → mismo archivo — Test: soft/hard delete muestra mensaje correcto
 
 ## Fase 5: Informes + PDF
-- [ ] **T5.1** Comandos Rust `get_compras_acumuladas` + `get_resumen_caja` → `src-tauri/src/commands/informes.rs` — Test: `cargo test` con datos seed
-- [ ] **T5.2** Comando `get_productos` → mismo archivo — Test: retorna lista de PAS con PASCOMP=1
-- [ ] **T5.3** Vista informe con filtros y tabla → `src/routes/informes/+page.svelte` — Test: genera tabla con datos correctos
-- [ ] **T5.4** Resumen de caja visual (tarjetas financieras) → mismo archivo — Test: cálculos coinciden con datos manuales
-- [ ] **T5.5** Generación PDF réplica → `src/lib/pdf.ts` — Test: PDF descargado coincide con formato de `info/image.png`
+- [x] **T5.1** Comandos Rust `get_compras_acumuladas` + `get_resumen_caja` → `src-tauri/src/commands/informes.rs` — Test: `cargo test` con datos seed
+- [x] **T5.2** Comando `get_productos` → mismo archivo — Test: retorna lista de PAS con PASCOMP=1
+- [x] **T5.3** Vista informe con filtros y tabla → `src/routes/informes/+page.svelte` — Test: genera tabla con datos correctos
+- [x] **T5.4** Resumen de caja visual (tarjetas financieras) → mismo archivo — Test: cálculos coinciden con datos manuales
+- [ ] **T5.5** Generación PDF réplica con Previsualización y Diálogo de Guardado → `src/lib/pdf.ts` & `src/lib/components/PDFPreviewModal.svelte` — Test: PDF renderiza interactivo en modal, y diálogo de Tauri guarda el archivo en la ruta del usuario.
 
 ## Fase 6: Auto-Updater + CI/CD
 - [ ] **T6.1** Generar keypair de firma → almacenar en GitHub Secrets — Test: `tauri signer generate` exitoso

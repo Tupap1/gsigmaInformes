@@ -156,7 +156,8 @@ El `delete_proveedor` debe verificar historial en todas las tablas compra* usand
   - `get_productos() -> Vec<Producto>`
 - `src-tauri/src/models/informe.rs` — Structs de reporte
 - `src/routes/informes/+page.svelte` — Vista del informe
-- `src/lib/pdf.ts` — Generación PDF con pdfmake (se mantiene en JS/cliente)
+- `src/lib/pdf.ts` — Generación, previsualización y guardado del PDF (se mantiene en JS/cliente usando pdfmake).
+- `src/lib/components/PDFPreviewModal.svelte` — [NEW] Modal de previsualización interactivo con un `<iframe>` usando el data URL generado por pdfmake.
 
 ### Lógica SQL (solo readPool)
 - Compras acumuladas: JOIN dcmpr × compra × pas con UNION ALL multi-año
@@ -164,9 +165,17 @@ El `delete_proveedor` debe verificar historial en todas las tablas compra* usand
 - Usar `NULLIF(SUM(), 0)` para evitar división por cero
 - Resumen de caja: 5 queries separadas (base, ingresos, ventas, compras, egresos)
 
+### Gestión de PDF (Previsualización y Descarga)
+- **Previsualización en Línea**: En lugar de descargar a ciegas, se utilizará `pdfDocGenerator.getDataUrl((dataUrl) => ...)` para cargar el PDF directamente en un iframe dentro del componente `PDFPreviewModal` y visualizarlo dentro del mismo Tauri Webview.
+- **Ubicación de Descarga**:
+  - Por defecto, las descargas del navegador en un Webview van a la carpeta de descargas del sistema (`C:\Users\Andres\Downloads` en Windows).
+  - Para permitir cambiar esto, se implementará el plugin oficial de diálogos de Tauri (`@tauri-apps/plugin-dialog`) para que al presionar "Guardar Como", se le abra al usuario el explorador nativo de archivos permitiendo elegir la ubicación exacta (ej. Escritorio, descargas) y el nombre del archivo `.pdf`.
+
 ### Test de verificación
-- Query con rango de fechas retorna datos agrupados correctamente
-- PDF generado tiene formato idéntico al ticket de referencia (`info/image.png`)
+- Query con rango de fechas retorna datos agrupados correctamente.
+- El PDF se renderiza y previsualiza en el modal interactivo sin errores de CORS o renderizado.
+- El diálogo nativo de Tauri permite guardar el archivo en una ruta elegida por el usuario.
+- El PDF descargado/guardado coincide exactamente con el formato de `info/image.png`.
 
 ---
 
