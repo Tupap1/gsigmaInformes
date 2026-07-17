@@ -47,8 +47,8 @@ Se necesita migrar a una aplicación de escritorio nativa con Tauri que:
 - [x] Vista de lista de proveedores con búsqueda en tiempo real
 - [x] Formulario de creación/edición con validación client-side
 - [x] Modal de confirmación para borrado con feedback (hard/soft delete)
-- [ ] Vista de informe interactivo en pantalla con filtros de fecha y desglose de caja
-- [ ] Exportación de PDF utilizando el diálogo nativo de Windows ("Guardar Como") para seleccionar la ruta de destino
+- [x] Vista de informe interactivo en pantalla con filtros de fecha y desglose de caja
+- [x] Exportación de PDF utilizando el diálogo nativo de Windows ("Guardar Como") para seleccionar la ruta de destino
 - [ ] Diseño dark mode premium (glassmorphism, micro-animaciones)
 
 ### CA4: Auto-updater
