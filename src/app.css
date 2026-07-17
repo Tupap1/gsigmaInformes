@@ -1,27 +1,28 @@
 /* Design System - Informes Recicladora Boyacá */
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Color Palette */
-  --bg-primary: #090e1a;
+  /* Color Palette - Premium Calibrated Grays (No flashy blues/purples) */
+  --bg-primary: #0a0f1d;
   --bg-secondary: #0d1425;
-  --bg-card: rgba(18, 27, 49, 0.7);
-  --bg-card-hover: rgba(26, 38, 67, 0.8);
-  --border-color: rgba(255, 255, 255, 0.07);
-  --border-color-hover: rgba(255, 255, 255, 0.15);
+  --bg-card: rgba(15, 23, 42, 0.45);
+  --bg-card-hover: rgba(22, 32, 59, 0.55);
+  --border-color: rgba(255, 255, 255, 0.05);
+  --border-color-hover: rgba(255, 255, 255, 0.09);
+  --border-active: rgba(16, 185, 129, 0.25);
   
-  /* Ecological Green Accents */
+  /* Ecological Green Accents (Used Selectively) */
   --accent-green: #10b981;
   --accent-green-hover: #059669;
-  --accent-green-light: rgba(16, 185, 129, 0.12);
-  --accent-green-glow: rgba(16, 185, 129, 0.35);
+  --accent-green-light: rgba(16, 185, 129, 0.06);
+  --accent-green-glow: rgba(16, 185, 129, 0.12);
   
   /* Accent Reds (Destructive actions) */
   --accent-red: #ef4444;
   --accent-red-hover: #dc2626;
-  --accent-red-light: rgba(239, 68, 68, 0.12);
-  --accent-red-glow: rgba(239, 68, 68, 0.35);
+  --accent-red-light: rgba(239, 68, 68, 0.06);
+  --accent-red-glow: rgba(239, 68, 68, 0.12);
 
   /* Neutrals & Text */
   --text-primary: #f8fafc;
@@ -29,13 +30,12 @@
   --text-muted: #64748b;
   
   /* Fonts & Spacing */
-  --font-sans: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
-  --sidebar-width: 260px;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --sidebar-width: 240px;
   
   /* Shadows & Glassmorphism */
-  --shadow-premium: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 20px -5px var(--accent-green-glow);
-  --glass-blur: blur(16px);
+  --shadow-premium: 0 8px 20px -6px rgba(0, 0, 0, 0.6);
+  --glass-blur: blur(12px);
 }
 
 /* Base resets */
@@ -48,9 +48,8 @@
 body {
   background-color: var(--bg-primary);
   background-image: 
-    radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 100% 100%, rgba(30, 41, 59, 0.2) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(13, 20, 37, 0.5) 0%, #090e1a 100%);
+    radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.01) 0%, transparent 60%),
+    radial-gradient(circle at 50% 100%, rgba(13, 20, 37, 0.2) 0%, var(--bg-primary) 100%);
   color: var(--text-primary);
   font-family: var(--font-sans);
   height: 100vh;
@@ -62,13 +61,13 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   color: var(--text-primary);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -76,7 +75,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 9999px;
 }
 
@@ -96,7 +95,7 @@ h1, h2, h3, h4, h5, h6 {
   flex: 1;
   height: 100vh;
   overflow-y: auto;
-  padding: 40px;
+  padding: 28px 36px;
   position: relative;
 }
 
@@ -106,9 +105,9 @@ h1, h2, h3, h4, h5, h6 {
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-color);
-  border-radius: 20px;
+  border-radius: 8px;
   box-shadow: var(--shadow-premium);
-  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .glass-panel:hover {
@@ -118,42 +117,36 @@ h1, h2, h3, h4, h5, h6 {
 /* Interactive Elements */
 button, .btn {
   font-family: var(--font-sans);
-  font-size: 14px;
-  font-weight: 600;
-  padding: 10px 20px;
-  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 6px;
   border: 1px solid transparent;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 6px;
+  transition: all 0.12s ease;
 }
 
 .btn-primary {
   background: var(--accent-green);
-  color: #052e16;
+  color: #042f1a;
 }
 
 .btn-primary:hover {
   background: var(--accent-green-hover);
-  box-shadow: 0 0 15px var(--accent-green-glow);
-  transform: translateY(-1px);
-}
-
-.btn-primary:active {
-  transform: translateY(0);
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   border-color: var(--border-color-hover);
 }
 
@@ -164,40 +157,38 @@ button, .btn {
 
 .btn-danger:hover {
   background: var(--accent-red-hover);
-  box-shadow: 0 0 15px var(--accent-red-glow);
-  transform: translateY(-1px);
 }
 
 /* Form inputs */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 16px;
+  gap: 5px;
+  margin-bottom: 12px;
 }
 
 .form-group label {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 550;
   color: var(--text-secondary);
 }
 
 .form-control {
-  background: rgba(13, 20, 37, 0.5);
+  background: rgba(13, 20, 37, 0.45);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: 6px;
   color: var(--text-primary);
   font-family: var(--font-sans);
-  font-size: 14px;
-  padding: 11px 14px;
-  transition: all 0.2s ease;
+  font-size: 13px;
+  padding: 8px 12px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
   width: 100%;
 }
 
 .form-control:focus {
   outline: none;
   border-color: var(--accent-green);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
 }
 
 .form-control::placeholder {
@@ -207,7 +198,7 @@ button, .btn {
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 12px;
 }
 
 /* Shimmer Animation for Skeleton Loaders */
@@ -221,19 +212,19 @@ button, .btn {
 }
 
 .skeleton-shimmer {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 75%);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.02) 25%, rgba(255, 255, 255, 0.06) 50%, rgba(255, 255, 255, 0.02) 75%);
   background-size: 200% 100%;
-  animation: shimmer 1.6s infinite;
+  animation: shimmer 1.8s infinite;
 }
 
 /* Base Micro-animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(3px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes slideInRight {
@@ -242,5 +233,5 @@ button, .btn {
 }
 
 .animate-slide-in-right {
-  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideInRight 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

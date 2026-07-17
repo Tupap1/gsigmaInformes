@@ -91,7 +91,10 @@ mod tests {
     #[test]
     fn test_start_year_after_end_year() {
         let err = get_year_tables("compra", "2024-01-01", "2023-01-01").unwrap_err();
-        assert_eq!(err, "La fecha de inicio no puede ser posterior a la fecha de fin");
+        assert_eq!(
+            err,
+            "La fecha de inicio no puede ser posterior a la fecha de fin"
+        );
     }
 
     #[test]

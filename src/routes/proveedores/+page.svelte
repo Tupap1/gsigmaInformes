@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { api, type Proveedor, type CreateProveedorInput, type UpdateProveedorInput } from '$lib/api';
-  import { toasts } from '$lib/stores/toasts';
+  import { toasts } from '$lib/stores/toasts.svelte';
   import Modal from '$lib/components/Modal.svelte';
   import SkeletonLoader from '$lib/components/SkeletonLoader.svelte';
 
@@ -40,7 +40,7 @@
       suppliers = await api.listProveedores(includeInactive);
     } catch (e: any) {
       console.error(e);
-      toasts.error(`Error al cargar proveedores: ${e}`);
+      toasts.error(`Error al cargar terceros: ${e}`);
     } finally {
       loading = false;
     }
@@ -60,7 +60,6 @@
 
   // Watch includeInactive to reload
   $effect(() => {
-    // This triggers fetchSuppliers whenever includeInactive changes
     fetchSuppliers();
   });
 
@@ -117,7 +116,7 @@
     }
 
     if (formMode === 'create' && !numDoc.trim()) {
-      toasts.error('El número de documento es requerido.');
+      toasts.error('El número de identificación es requerido.');
       return;
     }
 
@@ -138,7 +137,7 @@
           departamento: departamento.trim() || null
         };
         const newId = await api.createProveedor(input);
-        toasts.success(`Proveedor creado con éxito. Código: ${newId}`);
+        toasts.success(`Tercero creado con éxito. Código: ${newId}`);
       } else if (formMode === 'edit' && selectedSupplier) {
         const input: UpdateProveedorInput = {
           nombre: nombre.trim(),
@@ -153,14 +152,14 @@
           status: status
         };
         await api.updateProveedor(selectedSupplier.id, input);
-        toasts.success(`Proveedor actualizado con éxito.`);
+        toasts.success(`Tercero actualizado con éxito.`);
       }
 
       showFormPanel = false;
       fetchSuppliers();
     } catch (e: any) {
       console.error(e);
-      toasts.error(`Error al guardar proveedor: ${e}`);
+      toasts.error(`Error al guardar tercero: ${e}`);
     } finally {
       saving = false;
     }
@@ -179,17 +178,16 @@
           toasts.success(res.message);
         }
         
-        // Show detailed pop-up about the result
-        toasts.info(`Acción: ${res.action === 'deactivated' ? 'Desactivación lógica' : 'Eliminación física'}. Razón: ${res.reason}`, 6000);
+        toasts.info(`Acción: ${res.action === 'deactivated' ? 'Desactivación lógica' : 'Eliminación física'}. Motivo: ${res.reason}`, 6000);
         
         supplierToDelete = null;
         fetchSuppliers();
       } else {
-        toasts.error(`No se pudo eliminar: ${res.message}`);
+        toasts.error(`No se pudo procesar: ${res.message}`);
       }
     } catch (e: any) {
       console.error(e);
-      toasts.error(`Error al eliminar proveedor: ${e}`);
+      toasts.error(`Error al eliminar tercero: ${e}`);
     } finally {
       deleting = false;
     }
@@ -201,17 +199,17 @@
 </script>
 
 <svelte:head>
-  <title>Proveedores - Recicladora Boyacá</title>
+  <title>Terceros - Recicladora Boyacá</title>
 </svelte:head>
 
 <div class="proveedores-view animate-fade-in">
   <div class="header-section">
     <div>
-      <h1 class="page-title">Gestión de Proveedores</h1>
-      <p class="page-subtitle">Administra los proveedores locales del POS</p>
+      <h1 class="page-title">Gestión de Terceros (Proveedores)</h1>
+      <p class="page-subtitle">Catálogo centralizado de proveedores del POS en producción</p>
     </div>
-    <button class="btn btn-primary shadow-glow" onclick={openCreateForm}>
-      <span>➕</span> Nuevo Proveedor
+    <button class="btn btn-primary" onclick={openCreateForm}>
+      <span>➕</span> Registrar Tercero
     </button>
   </div>
 
@@ -221,7 +219,7 @@
       <span class="search-icon">🔍</span>
       <input 
         type="text" 
-        placeholder="Buscar por nombre, apellido, documento o código..." 
+        placeholder="Buscar por nombre, apellidos, identificación o código..." 
         class="form-control search-input" 
         bind:value={searchQuery}
       />
@@ -233,31 +231,31 @@
     <label class="checkbox-container">
       <input type="checkbox" bind:checked={includeInactive} />
       <span class="checkmark"></span>
-      Mostrar proveedores inactivos
+      Incluir terceros inactivos
     </label>
   </div>
 
   <!-- Main Table -->
   <div class="table-container glass-panel">
     {#if loading}
-      <SkeletonLoader type="table-row" count={5} />
+      <SkeletonLoader type="table-row" count={8} />
     {:else if filteredSuppliers.length === 0}
       <div class="empty-state">
         <span class="empty-icon">👥</span>
-        <h3>No se encontraron proveedores</h3>
-        <p>Prueba ajustando la búsqueda o habilita ver inactivos</p>
+        <h3>No se encontraron registros de terceros</h3>
+        <p>Ajuste el término de búsqueda o habilite la inclusión de inactivos</p>
       </div>
     {:else}
       <table class="suppliers-table">
         <thead>
           <tr>
-            <th>Código</th>
-            <th>Documento</th>
+            <th class="col-code">Código</th>
+            <th class="col-doc">Identificación</th>
             <th>Nombre / Razón Social</th>
-            <th>Contacto</th>
+            <th>Contacto / Ruta</th>
             <th>Teléfono</th>
-            <th>Email</th>
-            <th>Estado</th>
+            <th>Correo Electrónico</th>
+            <th class="col-status">Estado</th>
             <th class="actions-header">Acciones</th>
           </tr>
         </thead>
@@ -281,10 +279,10 @@
                 </span>
               </td>
               <td class="actions-cell">
-                <button class="action-btn edit" onclick={() => openEditForm(supplier)} title="Editar proveedor">
+                <button class="action-btn edit" onclick={() => openEditForm(supplier)} title="Editar tercero">
                   ✏️
                 </button>
-                <button class="action-btn delete" onclick={() => supplierToDelete = supplier} title="Eliminar proveedor">
+                <button class="action-btn delete" onclick={() => supplierToDelete = supplier} title="Desactivar/Eliminar tercero">
                   🗑️
                 </button>
               </td>
@@ -301,18 +299,18 @@
   <div class="form-overlay" onclick={() => showFormPanel = false}>
     <div class="form-panel animate-slide-in-right" onclick={(e) => e.stopPropagation()}>
       <div class="panel-header">
-        <h2>{formMode === 'create' ? 'Crear Nuevo Proveedor' : 'Editar Proveedor'}</h2>
+        <h2>{formMode === 'create' ? 'Registrar Tercero (Proveedor)' : 'Modificar Tercero (Proveedor)'}</h2>
         <button class="close-panel" onclick={() => showFormPanel = false}>&times;</button>
       </div>
 
       <form onsubmit={handleSubmit} class="panel-body">
         <div class="form-section">
-          <h3>Información Básica</h3>
+          <h3>Datos Básicos</h3>
           
           <div class="form-row">
             <div class="form-group">
-              <label for="tipoDoc">Tipo de Documento</label>
-              <select id="tipoDoc" class="form-control" bind:value={tipoDoc} disabled={formMode === 'edit'}>
+              <label for="tipoDoc">Tipo de Identificación</label>
+              <select id="tipoDoc" class="form-control custom-select" bind:value={tipoDoc} disabled={formMode === 'edit'}>
                 <option value="C">Cédula de Ciudadanía (C)</option>
                 <option value="N">NIT (N)</option>
                 <option value="E">Cédula de Extranjería (E)</option>
@@ -320,7 +318,7 @@
             </div>
             
             <div class="form-group">
-              <label for="numDoc">Número de Documento *</label>
+              <label for="numDoc">Número de Identificación *</label>
               <input 
                 id="numDoc" 
                 type="text" 
@@ -339,46 +337,46 @@
               id="nombre" 
               type="text" 
               class="form-control" 
-              placeholder="Nombre principal" 
+              placeholder="Nombre comercial o principal" 
               bind:value={nombre} 
               required 
             />
           </div>
 
           <div class="form-group">
-            <label for="apellido">Apellido (Opcional)</label>
+            <label for="apellido">Primer/Segundo Apellido (Persona Natural)</label>
             <input 
               id="apellido" 
               type="text" 
               class="form-control" 
-              placeholder="Apellido si es persona natural" 
+              placeholder="Apellidos del tercero" 
               bind:value={apellido} 
             />
           </div>
         </div>
 
         <div class="form-section">
-          <h3>Contacto y Ubicación</h3>
+          <h3>Ubicación y Contacto</h3>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="telefono1">Teléfono 1</label>
+              <label for="telefono1">Teléfono Principal</label>
               <input 
                 id="telefono1" 
                 type="text" 
                 class="form-control" 
-                placeholder="Principal" 
+                placeholder="Celular/Fijo" 
                 bind:value={telefono1} 
               />
             </div>
             
             <div class="form-group">
-              <label for="telefono2">Teléfono 2</label>
+              <label for="telefono2">Teléfono Alterno</label>
               <input 
                 id="telefono2" 
                 type="text" 
                 class="form-control" 
-                placeholder="Alternativo" 
+                placeholder="Opcional" 
                 bind:value={telefono2} 
               />
             </div>
@@ -390,18 +388,18 @@
               id="email" 
               type="email" 
               class="form-control" 
-              placeholder="ejemplo@correo.com" 
+              placeholder="ejemplo@recicladora.com" 
               bind:value={email} 
             />
           </div>
 
           <div class="form-group">
-            <label for="contacto">Contacto Adicional (Ruta / Encargado)</label>
+            <label for="contacto">Contacto de Ruta / Encargado</label>
             <input 
               id="contacto" 
               type="text" 
               class="form-control" 
-              placeholder="Ej. Conductor o Asistente" 
+              placeholder="Ej. Conductor, Administrador" 
               bind:value={contacto} 
             />
           </div>
@@ -412,7 +410,7 @@
               id="direccion1" 
               type="text" 
               class="form-control" 
-              placeholder="Calle / Carrera" 
+              placeholder="Ej. Calle 10 # 4-50" 
               bind:value={direccion1} 
             />
           </div>
@@ -444,7 +442,7 @@
           {#if formMode === 'edit'}
             <div class="form-group">
               <label for="status">Estado</label>
-              <select id="status" class="form-control" bind:value={status}>
+              <select id="status" class="form-control custom-select" bind:value={status}>
                 <option value="A">Activo</option>
                 <option value="I">Inactivo</option>
               </select>
@@ -457,7 +455,7 @@
             Cancelar
           </button>
           <button type="submit" class="btn btn-primary" disabled={saving}>
-            {saving ? 'Guardando...' : 'Guardar Proveedor'}
+            {saving ? 'Guardando...' : 'Guardar Registro'}
           </button>
         </div>
       </form>
@@ -468,26 +466,26 @@
 <!-- Secure Delete Modal -->
 {#if supplierToDelete}
   <Modal 
-    title="Confirmar Eliminación de Proveedor" 
+    title="Confirmar Inactivación / Eliminación" 
     onclose={() => supplierToDelete = null}
-    maxWidth="520px"
+    maxWidth="500px"
   >
-    <div class="delete-warning-content">
+    <div class="delete-warning-content animate-fade-in">
       <div class="warning-banner">
         <span class="warning-icon">⚠️</span>
         <div class="warning-text">
-          <strong>Advertencia de Integridad de Datos</strong>
-          <p>Esta acción está conectada al POS de producción.</p>
+          <strong>Advertencia de Integridad Contable</strong>
+          <p>Esta acción se ejecutará directamente sobre la base de datos de producción.</p>
         </div>
       </div>
 
       <div class="supplier-details-box">
         <div class="detail-item">
-          <span class="lbl">Proveedor:</span>
+          <span class="lbl">Tercero:</span>
           <span class="val">{supplierToDelete.nombre} {supplierToDelete.apellido || ''}</span>
         </div>
         <div class="detail-item">
-          <span class="lbl">Documento:</span>
+          <span class="lbl">Identificación:</span>
           <span class="val">({supplierToDelete.tipoDoc}) {supplierToDelete.numDoc}</span>
         </div>
         <div class="detail-item">
@@ -497,12 +495,10 @@
       </div>
 
       <div class="delete-info-note">
-        <p>
-          <strong>Protocolo de Borrado Seguro:</strong>
-        </p>
+        <p><strong>Protocolo de Seguridad Contable (Borrado Seguro):</strong></p>
         <ul>
-          <li>Si el proveedor **tiene compras registradas**, se desactivará lógicamente (`status = 'I'`) para no alterar el historial contable de la empresa (soft-delete).</li>
-          <li>Si **no tiene compras registradas**, se eliminará físicamente de forma permanente de las tablas `proveedo` y `trc`.</li>
+          <li>Si el tercero <strong>registra compras contables</strong>, se desactivará lógicamente (Estado: Inactivo) para conservar la trazabilidad histórica de la empresa.</li>
+          <li>Si el tercero <strong>no registra movimientos de compra</strong>, se eliminará físicamente del sistema (tablas <code>proveedo</code> y <code>trc</code>).</li>
         </ul>
       </div>
     </div>
@@ -511,8 +507,8 @@
       <button class="btn btn-secondary" onclick={() => supplierToDelete = null} disabled={deleting}>
         Cancelar
       </button>
-      <button class="btn btn-danger shadow-glow" onclick={confirmDelete} disabled={deleting}>
-        {deleting ? 'Eliminando...' : 'Confirmar Eliminación'}
+      <button class="btn btn-danger" onclick={confirmDelete} disabled={deleting}>
+        {deleting ? 'Procesando...' : 'Desactivar / Eliminar Tercero'}
       </button>
     {/snippet}
   </Modal>
@@ -522,8 +518,7 @@
   .proveedores-view {
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    gap: 16px;
   }
 
   .header-section {
@@ -533,29 +528,27 @@
   }
 
   .page-title {
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
   }
 
   .page-subtitle {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-secondary);
-    margin-top: 4px;
+    margin-top: 2px;
   }
 
   /* Filters Card */
   .filters-card {
-    padding: 20px;
+    padding: 12px 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
+    gap: 16px;
     flex-wrap: wrap;
-    background: rgba(13, 20, 37, 0.4);
+    background: rgba(13, 20, 37, 0.25);
   }
 
   .search-box {
@@ -566,27 +559,27 @@
 
   .search-icon {
     position: absolute;
-    left: 14px;
+    left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 16px;
+    font-size: 14px;
     color: var(--text-muted);
   }
 
   .search-input {
-    padding-left: 42px;
-    padding-right: 36px;
+    padding-left: 36px;
+    padding-right: 32px;
   }
 
   .clear-search {
     position: absolute;
-    right: 12px;
+    right: 10px;
     top: 50%;
     transform: translateY(-50%);
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
   }
 
@@ -595,9 +588,9 @@
     display: flex;
     align-items: center;
     position: relative;
-    padding-left: 28px;
+    padding-left: 24px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 500;
     color: var(--text-secondary);
     user-select: none;
@@ -614,16 +607,16 @@
   .checkmark {
     position: absolute;
     left: 0;
-    height: 18px;
-    width: 18px;
-    background-color: rgba(13, 20, 37, 0.6);
+    height: 15px;
+    width: 15px;
+    background-color: rgba(13, 20, 37, 0.4);
     border: 1px solid var(--border-color);
-    border-radius: 5px;
-    transition: all 0.2s;
+    border-radius: 4px;
+    transition: all 0.1s;
   }
 
   .checkbox-container:hover input ~ .checkmark {
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: var(--border-color-hover);
   }
 
   .checkbox-container input:checked ~ .checkmark {
@@ -642,63 +635,76 @@
   }
 
   .checkbox-container .checkmark:after {
-    left: 6px;
+    left: 5px;
     top: 2px;
-    width: 4px;
-    height: 9px;
-    border: solid #052e16;
-    border-width: 0 2px 2px 0;
+    width: 3px;
+    height: 7px;
+    border: solid #042f1a;
+    border-width: 0 1.5px 1.5px 0;
     transform: rotate(45deg);
   }
 
-  /* Table styles */
+  /* Table styles - Denser structure */
   .table-container {
     overflow-x: auto;
-    background: rgba(13, 20, 37, 0.35);
-    border-radius: 20px;
-    padding: 8px;
+    background: rgba(13, 20, 37, 0.2);
+    border-radius: 8px;
+    padding: 0;
   }
 
   .suppliers-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    font-size: 13.5px;
+    font-size: 12.5px;
   }
 
   .suppliers-table th {
-    padding: 16px 20px;
+    padding: 10px 14px;
     font-weight: 600;
     color: var(--text-muted);
-    font-size: 11px;
+    font-size: 10.5px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(9, 14, 26, 0.2);
   }
 
   .suppliers-table td {
-    padding: 16px 20px;
+    padding: 10px 14px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.03);
     color: var(--text-primary);
+    white-space: nowrap;
   }
 
   .table-row {
-    transition: background-color 0.2s;
+    transition: background-color 0.1s ease;
   }
 
   .table-row:hover {
-    background-color: rgba(255, 255, 255, 0.02);
+    background-color: rgba(255, 255, 255, 0.015);
   }
 
   .inactive-row {
-    opacity: 0.6;
+    opacity: 0.55;
+  }
+
+  .col-code {
+    width: 90px;
+  }
+
+  .col-doc {
+    width: 120px;
+  }
+
+  .col-status {
+    width: 100px;
   }
 
   .supplier-code {
     font-family: monospace;
     font-weight: 600;
     color: var(--accent-green);
-    font-size: 13px;
   }
 
   .supplier-name {
@@ -707,19 +713,18 @@
 
   .supplier-email {
     max-width: 180px;
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .doc-badge {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--border-color);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-size: 11px;
+    border-radius: 3px;
+    padding: 1px 4px;
+    font-size: 10px;
     font-weight: 600;
-    margin-right: 6px;
+    margin-right: 4px;
     color: var(--text-secondary);
   }
 
@@ -727,83 +732,81 @@
   .status-badge {
     display: inline-flex;
     align-items: center;
-    padding: 3px 10px;
-    border-radius: 9999px;
-    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10.5px;
     font-weight: 600;
     border: 1px solid transparent;
   }
 
   .status-badge.active {
     background: var(--accent-green-light);
-    border-color: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.15);
     color: #34d399;
   }
 
   .status-badge.inactive {
     background: var(--accent-red-light);
-    border-color: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.15);
     color: #f87171;
   }
 
   /* Actions */
   .actions-header {
     text-align: right;
+    width: 80px;
   }
 
   .actions-cell {
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
+    gap: 6px;
   }
 
   .action-btn {
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-color);
     cursor: pointer;
-    font-size: 13px;
-    width: 32px;
-    height: 32px;
+    font-size: 11px;
+    width: 26px;
+    height: 26px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .action-btn:hover {
-    transform: translateY(-1px);
+    border-radius: 4px;
+    transition: all 0.1s ease;
   }
 
   .action-btn.edit:hover {
     background: var(--accent-green-light);
-    border-color: rgba(16, 185, 129, 0.3);
+    border-color: rgba(16, 185, 129, 0.25);
     color: var(--accent-green);
   }
 
   .action-btn.delete:hover {
     background: var(--accent-red-light);
-    border-color: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.25);
     color: var(--accent-red);
   }
 
   /* Empty State */
   .empty-state {
-    padding: 60px 20px;
+    padding: 48px 16px;
     text-align: center;
     color: var(--text-secondary);
   }
 
   .empty-icon {
-    font-size: 40px;
+    font-size: 32px;
     display: block;
-    margin-bottom: 16px;
-    opacity: 0.5;
+    margin-bottom: 12px;
+    opacity: 0.4;
   }
 
   .empty-state h3 {
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     font-weight: 600;
+    font-size: 14px;
   }
 
   /* Slide-over Form Panel */
@@ -813,20 +816,20 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(4, 6, 12, 0.5);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(4, 6, 12, 0.45);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
     z-index: 900;
     display: flex;
     justify-content: flex-end;
   }
 
   .form-panel {
-    background: #0d1425;
+    background: var(--bg-secondary);
     width: 100%;
-    max-width: 500px;
+    max-width: 460px;
     height: 100%;
-    box-shadow: -10px 0 40px -10px rgba(0, 0, 0, 0.8);
+    box-shadow: -8px 0 24px -10px rgba(0, 0, 0, 0.7);
     display: flex;
     flex-direction: column;
     border-left: 1px solid var(--border-color);
@@ -836,18 +839,23 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 18px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .panel-header h2 {
+    font-size: 15px;
+    font-weight: 600;
   }
 
   .close-panel {
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    font-size: 28px;
+    font-size: 24px;
     cursor: pointer;
     line-height: 1;
-    padding: 4px;
+    padding: 2px;
   }
 
   .close-panel:hover {
@@ -857,80 +865,95 @@
   .panel-body {
     flex: 1;
     overflow-y: auto;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-  }
-
-  .form-section h3 {
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--accent-green);
-    margin-bottom: 16px;
-    border-left: 3px solid var(--accent-green);
-    padding-left: 10px;
-  }
-
-  .panel-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    padding: 20px 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    background: rgba(9, 14, 26, 0.5);
-  }
-
-  /* Delete warning */
-  .delete-warning-content {
+    padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 20px;
   }
 
+  .form-section h3 {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent-green);
+    margin-bottom: 12px;
+    border-left: 2px solid var(--accent-green);
+    padding-left: 8px;
+  }
+
+  .custom-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 18px;
+    padding-right: 30px;
+  }
+
+  .custom-select option {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+
+  .panel-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    background: rgba(9, 14, 26, 0.3);
+  }
+
+  /* Delete warning - Compact */
+  .delete-warning-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
   .warning-banner {
     display: flex;
     align-items: center;
-    gap: 14px;
-    background: rgba(239, 68, 68, 0.07);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: 12px;
-    padding: 16px;
+    gap: 12px;
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.15);
+    border-radius: 8px;
+    padding: 12px;
   }
 
   .warning-icon {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .warning-text strong {
     color: #fca5a5;
-    font-size: 14px;
+    font-size: 13px;
     display: block;
     margin-bottom: 2px;
   }
 
   .warning-text p {
-    font-size: 12px;
+    font-size: 11.5px;
     color: var(--text-secondary);
     margin: 0;
   }
 
   .supplier-details-box {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.01);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 16px;
+    border-radius: 8px;
+    padding: 12px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
 
   .detail-item {
     display: flex;
     justify-content: space-between;
-    font-size: 13.5px;
+    font-size: 12.5px;
   }
 
   .detail-item .lbl {
@@ -944,16 +967,20 @@
   }
 
   .delete-info-note {
-    font-size: 13px;
-    line-height: 1.5;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .delete-info-note p {
+    color: var(--text-primary);
   }
 
   .delete-info-note ul {
-    margin-top: 8px;
-    padding-left: 20px;
+    margin-top: 6px;
+    padding-left: 16px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
     color: var(--text-secondary);
   }
 </style>

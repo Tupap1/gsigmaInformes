@@ -1,6 +1,8 @@
-use tauri::State;
 use crate::db::AppDb;
-use crate::models::proveedor::{Proveedor, CreateProveedorInput, UpdateProveedorInput, DeleteResult};
+use crate::models::proveedor::{
+    CreateProveedorInput, DeleteResult, Proveedor, UpdateProveedorInput,
+};
+use tauri::State;
 
 fn map_upper_or_empty(val: &Option<String>) -> String {
     val.as_ref()
@@ -59,10 +61,7 @@ pub async fn perform_list_proveedores(
     Ok(result)
 }
 
-pub async fn perform_get_proveedor(
-    db: &AppDb,
-    id: String,
-) -> Result<Proveedor, String> {
+pub async fn perform_get_proveedor(db: &AppDb, id: String) -> Result<Proveedor, String> {
     let trimmed_id = id.trim();
     let query = r#"
       SELECT 
@@ -114,7 +113,10 @@ pub async fn perform_create_proveedor(
     }
     let tipo_doc = input.tipo_doc.trim();
     if tipo_doc != "C" && tipo_doc != "N" && tipo_doc != "E" {
-        return Err("El tipo de documento (tipoDoc) debe ser C (Cédula), N (NIT) o E (Extranjería).".to_string());
+        return Err(
+            "El tipo de documento (tipoDoc) debe ser C (Cédula), N (NIT) o E (Extranjería)."
+                .to_string(),
+        );
     }
 
     let empid = std::env::var("DB_EMPID").unwrap_or_else(|_| "000000000000001".to_string());
@@ -132,31 +134,29 @@ pub async fn perform_create_proveedor(
             "Ocurrió un error interno en el servidor.".to_string()
         })?;
 
-    let existing_prov: Option<String> = sqlx::query_scalar(
-        "SELECT PROCOD FROM pv.proveedo WHERE TRIM(PRONUMDOC) = ?"
-    )
-    .bind(trimmed_doc)
-    .fetch_optional(&mut *tx)
-    .await
-    .map_err(|e| {
-        log::error!("Error checking duplicate supplier: {:?}", e);
-        "Ocurrió un error interno en el servidor.".to_string()
-    })?;
+    let existing_prov: Option<String> =
+        sqlx::query_scalar("SELECT PROCOD FROM pv.proveedo WHERE TRIM(PRONUMDOC) = ?")
+            .bind(trimmed_doc)
+            .fetch_optional(&mut *tx)
+            .await
+            .map_err(|e| {
+                log::error!("Error checking duplicate supplier: {:?}", e);
+                "Ocurrió un error interno en el servidor.".to_string()
+            })?;
 
     if existing_prov.is_some() {
         return Err("Ya existe un proveedor con este número de documento.".to_string());
     }
 
-    let existing_trc: Option<String> = sqlx::query_scalar(
-        "SELECT TRCID FROM adm.trc WHERE TRIM(TRCNUMDOC) = ?"
-    )
-    .bind(trimmed_doc)
-    .fetch_optional(&mut *tx)
-    .await
-    .map_err(|e| {
-        log::error!("Error checking duplicate third party: {:?}", e);
-        "Ocurrió un error interno en el servidor.".to_string()
-    })?;
+    let existing_trc: Option<String> =
+        sqlx::query_scalar("SELECT TRCID FROM adm.trc WHERE TRIM(TRCNUMDOC) = ?")
+            .bind(trimmed_doc)
+            .fetch_optional(&mut *tx)
+            .await
+            .map_err(|e| {
+                log::error!("Error checking duplicate third party: {:?}", e);
+                "Ocurrió un error interno en el servidor.".to_string()
+            })?;
 
     let trcid: String;
 
@@ -172,14 +172,14 @@ pub async fn perform_create_proveedor(
 
     if let Some(trc_id) = existing_trc {
         trcid = trc_id.trim().to_string();
-        
+
         sqlx::query(
             r#"
             UPDATE adm.trc SET 
               TRCNOM = ?, TRCAPE = ?, TRCTEL1 = ?, TRCTEL2 = ?, trcema1 = ?, 
               TRCDIR1 = ?, TRCCIU = ?, TRCDEPA = ?, TRCULTMOD = CURDATE()
             WHERE TRCID = ?
-            "#
+            "#,
         )
         .bind(&nombre_upper)
         .bind(&apellido_upper)
@@ -203,16 +203,15 @@ pub async fn perform_create_proveedor(
             trimmed_doc
         };
 
-        let rows: Vec<String> = sqlx::query_scalar(
-            "SELECT PROCOD FROM pv.proveedo WHERE PROCOD LIKE ?"
-        )
-        .bind(format!("{}%", prefix))
-        .fetch_all(&mut *tx)
-        .await
-        .map_err(|e| {
-            log::error!("Failed to fetch sequence for prefix {}: {:?}", prefix, e);
-            "Ocurrió un error interno en el servidor.".to_string()
-        })?;
+        let rows: Vec<String> =
+            sqlx::query_scalar("SELECT PROCOD FROM pv.proveedo WHERE PROCOD LIKE ?")
+                .bind(format!("{}%", prefix))
+                .fetch_all(&mut *tx)
+                .await
+                .map_err(|e| {
+                    log::error!("Failed to fetch sequence for prefix {}: {:?}", prefix, e);
+                    "Ocurrió un error interno en el servidor.".to_string()
+                })?;
 
         let mut max_seq: u64 = 0;
         for r in rows {
@@ -240,7 +239,7 @@ pub async fn perform_create_proveedor(
               TRCTIPDOC, TRCNUMDOC, TRCDIR1, TRCCIU, TRCPAI, TRCNAT, 
               TRCDEPA, TRCTIP, TRCULTMOD
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'CO', ?, ?, ?, CURDATE())
-            "#
+            "#,
         )
         .bind(&empid)
         .bind(&trcid)
@@ -269,7 +268,7 @@ pub async fn perform_create_proveedor(
         INSERT INTO pv.proveedo (
           PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROFECMOD
         ) VALUES (?, ?, ?, ?, ?, ?, 'A', 'CO', CURDATE())
-        "#
+        "#,
     )
     .bind(&trcid)
     .bind(&contacto_upper)
@@ -316,16 +315,15 @@ pub async fn perform_update_proveedor(
             "Ocurrió un error interno en el servidor.".to_string()
         })?;
 
-    let existing_prov: Option<String> = sqlx::query_scalar(
-        "SELECT PROCOD FROM pv.proveedo WHERE TRIM(PROCOD) = ?"
-    )
-    .bind(trimmed_id)
-    .fetch_optional(&mut *tx)
-    .await
-    .map_err(|e| {
-        log::error!("Error checking supplier existence: {:?}", e);
-        "Ocurrió un error interno en el servidor.".to_string()
-    })?;
+    let existing_prov: Option<String> =
+        sqlx::query_scalar("SELECT PROCOD FROM pv.proveedo WHERE TRIM(PROCOD) = ?")
+            .bind(trimmed_id)
+            .fetch_optional(&mut *tx)
+            .await
+            .map_err(|e| {
+                log::error!("Error checking supplier existence: {:?}", e);
+                "Ocurrió un error interno en el servidor.".to_string()
+            })?;
 
     if existing_prov.is_none() {
         return Err("Proveedor no encontrado.".to_string());
@@ -348,7 +346,7 @@ pub async fn perform_update_proveedor(
           TRCNOM = ?, TRCAPE = ?, TRCTEL1 = ?, TRCTEL2 = ?, trcema1 = ?, 
           TRCDIR1 = ?, TRCCIU = ?, TRCDEPA = ?, TRCULTMOD = CURDATE()
         WHERE TRIM(TRCID) = ?
-        "#
+        "#,
     )
     .bind(&nombre_upper)
     .bind(&apellido_upper)
@@ -371,7 +369,7 @@ pub async fn perform_update_proveedor(
         UPDATE pv.proveedo SET 
           PROCON = ?, PROEMA = ?, status = ?, PROFECMOD = CURDATE()
         WHERE TRIM(PROCOD) = ?
-        "#
+        "#,
     )
     .bind(&contacto_upper)
     .bind(&email_val)
@@ -392,22 +390,18 @@ pub async fn perform_update_proveedor(
     Ok(())
 }
 
-pub async fn perform_delete_proveedor(
-    db: &AppDb,
-    id: String,
-) -> Result<DeleteResult, String> {
+pub async fn perform_delete_proveedor(db: &AppDb, id: String) -> Result<DeleteResult, String> {
     let trimmed_id = id.trim();
 
-    let existing: Option<String> = sqlx::query_scalar(
-        "SELECT PROCOD FROM pv.proveedo WHERE TRIM(PROCOD) = ?"
-    )
-    .bind(trimmed_id)
-    .fetch_optional(&db.read_pool)
-    .await
-    .map_err(|e| {
-        log::error!("Failed to verify supplier {}: {:?}", trimmed_id, e);
-        "Ocurrió un error interno en el servidor.".to_string()
-    })?;
+    let existing: Option<String> =
+        sqlx::query_scalar("SELECT PROCOD FROM pv.proveedo WHERE TRIM(PROCOD) = ?")
+            .bind(trimmed_id)
+            .fetch_optional(&db.read_pool)
+            .await
+            .map_err(|e| {
+                log::error!("Failed to verify supplier {}: {:?}", trimmed_id, e);
+                "Ocurrió un error interno en el servidor.".to_string()
+            })?;
 
     if existing.is_none() {
         return Err("Proveedor no encontrado.".to_string());
@@ -418,7 +412,7 @@ pub async fn perform_delete_proveedor(
         SELECT TABLE_NAME 
         FROM information_schema.TABLES 
         WHERE TABLE_SCHEMA = 'pv' AND TABLE_NAME LIKE 'compra%'
-        "#
+        "#,
     )
     .fetch_all(&db.read_pool)
     .await
@@ -431,10 +425,18 @@ pub async fn perform_delete_proveedor(
     if !table_rows.is_empty() {
         let union_queries: Vec<String> = table_rows
             .iter()
-            .map(|t| format!("(SELECT COMNUM FROM pv.{} WHERE TRIM(COMPRO) = ? LIMIT 1)", t))
+            .map(|t| {
+                format!(
+                    "(SELECT COMNUM FROM pv.{} WHERE TRIM(COMPRO) = ? LIMIT 1)",
+                    t
+                )
+            })
             .collect();
         let union_query = union_queries.join(" UNION ALL ");
-        let final_query = format!("SELECT 1 AS has_purchases FROM ({}) AS tmp LIMIT 1", union_query);
+        let final_query = format!(
+            "SELECT 1 AS has_purchases FROM ({}) AS tmp LIMIT 1",
+            union_query
+        );
 
         let mut query = sqlx::query(&final_query);
         for _ in 0..table_rows.len() {
@@ -459,14 +461,16 @@ pub async fn perform_delete_proveedor(
     let message: String;
 
     if has_purchases {
-        sqlx::query("UPDATE pv.proveedo SET status = 'I', PROFECMOD = CURDATE() WHERE TRIM(PROCOD) = ?")
-            .bind(trimmed_id)
-            .execute(&mut *tx)
-            .await
-            .map_err(|e| {
-                log::error!("Failed to deactivate supplier {}: {:?}", trimmed_id, e);
-                "Ocurrió un error interno en el servidor.".to_string()
-            })?;
+        sqlx::query(
+            "UPDATE pv.proveedo SET status = 'I', PROFECMOD = CURDATE() WHERE TRIM(PROCOD) = ?",
+        )
+        .bind(trimmed_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| {
+            log::error!("Failed to deactivate supplier {}: {:?}", trimmed_id, e);
+            "Ocurrió un error interno en el servidor.".to_string()
+        })?;
         action = "deactivated".to_string();
         reason = "El proveedor tiene transacciones históricas de compras. Se desactivó el registro para conservar integridad.".to_string();
         message = "Proveedor desactivado (soft-delete) por historial de transacciones.".to_string();
@@ -476,7 +480,11 @@ pub async fn perform_delete_proveedor(
             .execute(&mut *tx)
             .await
             .map_err(|e| {
-                log::error!("Failed to physically delete supplier {}: {:?}", trimmed_id, e);
+                log::error!(
+                    "Failed to physically delete supplier {}: {:?}",
+                    trimmed_id,
+                    e
+                );
                 "Ocurrió un error interno en el servidor.".to_string()
             })?;
 
@@ -485,7 +493,11 @@ pub async fn perform_delete_proveedor(
             .execute(&mut *tx)
             .await
             .map_err(|e| {
-                log::error!("Failed to delete third party record {}: {:?}", trimmed_id, e);
+                log::error!(
+                    "Failed to delete third party record {}: {:?}",
+                    trimmed_id,
+                    e
+                );
                 "Ocurrió un error interno en el servidor.".to_string()
             })?;
         action = "deleted".to_string();
@@ -516,10 +528,7 @@ pub async fn list_proveedores(
 }
 
 #[tauri::command]
-pub async fn get_proveedor(
-    db: State<'_, AppDb>,
-    id: String,
-) -> Result<Proveedor, String> {
+pub async fn get_proveedor(db: State<'_, AppDb>, id: String) -> Result<Proveedor, String> {
     perform_get_proveedor(&db, id).await
 }
 
@@ -541,10 +550,7 @@ pub async fn update_proveedor(
 }
 
 #[tauri::command]
-pub async fn delete_proveedor(
-    db: State<'_, AppDb>,
-    id: String,
-) -> Result<DeleteResult, String> {
+pub async fn delete_proveedor(db: State<'_, AppDb>, id: String) -> Result<DeleteResult, String> {
     perform_delete_proveedor(&db, id).await
 }
 
@@ -555,10 +561,14 @@ mod tests {
 
     #[tokio::test]
     async fn test_list_and_get_proveedores() {
-        let db_state = db::create_pools().await.expect("Failed to initialize pools");
+        let db_state = db::create_pools()
+            .await
+            .expect("Failed to initialize pools");
 
         // List active suppliers
-        let list = perform_list_proveedores(&db_state, Some(false)).await.unwrap();
+        let list = perform_list_proveedores(&db_state, Some(false))
+            .await
+            .unwrap();
         assert!(!list.is_empty(), "Supplier list should not be empty");
 
         // The active list should only contain status 'A'
@@ -573,13 +583,17 @@ mod tests {
         assert_eq!(prov.num_doc, "900123456");
 
         // Attempt to get non-existent supplier
-        let err = perform_get_proveedor(&db_state, "NON_EXISTENT".to_string()).await.unwrap_err();
+        let err = perform_get_proveedor(&db_state, "NON_EXISTENT".to_string())
+            .await
+            .unwrap_err();
         assert_eq!(err, "Proveedor no encontrado");
     }
 
     #[tokio::test]
     async fn test_crud_proveedor_lifecycle() {
-        let db_state = db::create_pools().await.expect("Failed to initialize pools");
+        let db_state = db::create_pools()
+            .await
+            .expect("Failed to initialize pools");
 
         // Generate unique doc number to avoid collision
         let rand_num: u64 = chrono::Utc::now().timestamp_millis() as u64 % 100000;
@@ -603,13 +617,21 @@ mod tests {
         let created_id = perform_create_proveedor(&db_state, input).await.unwrap();
         assert!(!created_id.is_empty(), "Returned ID should not be empty");
         let expected_prefix = &test_doc[0..5];
-        assert!(created_id.starts_with(expected_prefix), "ID does not start with expected prefix");
+        assert!(
+            created_id.starts_with(expected_prefix),
+            "ID does not start with expected prefix"
+        );
 
         // 2. Fetch and verify
-        let fetched = perform_get_proveedor(&db_state, created_id.clone()).await.unwrap();
+        let fetched = perform_get_proveedor(&db_state, created_id.clone())
+            .await
+            .unwrap();
         assert_eq!(fetched.nombre, "PROVEEDOR TEST DE INTEGRACION");
         assert_eq!(fetched.apellido.as_deref(), Some("LTDA"));
-        assert_eq!(fetched.email.as_deref(), Some("test_integration@recicladora.com"));
+        assert_eq!(
+            fetched.email.as_deref(),
+            Some("test_integration@recicladora.com")
+        );
         assert_eq!(fetched.contacto.as_deref(), Some("TEST CONTACTO"));
 
         // 3. Duplicate check validation
@@ -626,8 +648,13 @@ mod tests {
             ciudad: None,
             departamento: None,
         };
-        let dup_err = perform_create_proveedor(&db_state, duplicate_input).await.unwrap_err();
-        assert_eq!(dup_err, "Ya existe un proveedor con este número de documento.");
+        let dup_err = perform_create_proveedor(&db_state, duplicate_input)
+            .await
+            .unwrap_err();
+        assert_eq!(
+            dup_err,
+            "Ya existe un proveedor con este número de documento."
+        );
 
         // 4. Update fields
         let update_input = UpdateProveedorInput {
@@ -642,45 +669,67 @@ mod tests {
             departamento: Some("Boyacá".to_string()),
             status: Some("A".to_string()),
         };
-        perform_update_proveedor(&db_state, created_id.clone(), update_input).await.unwrap();
+        perform_update_proveedor(&db_state, created_id.clone(), update_input)
+            .await
+            .unwrap();
 
         // Verify update
-        let fetched_updated = perform_get_proveedor(&db_state, created_id.clone()).await.unwrap();
+        let fetched_updated = perform_get_proveedor(&db_state, created_id.clone())
+            .await
+            .unwrap();
         assert_eq!(fetched_updated.nombre, "PROVEEDOR TEST MODIFICADO");
         assert_eq!(fetched_updated.apellido.as_deref(), Some("S.A."));
         assert_eq!(fetched_updated.telefono1.as_deref(), Some("444-2222"));
         assert_eq!(fetched_updated.telefono2.as_deref(), Some("555-3333"));
-        assert_eq!(fetched_updated.email.as_deref(), Some("mod@recicladora.com"));
+        assert_eq!(
+            fetched_updated.email.as_deref(),
+            Some("mod@recicladora.com")
+        );
         assert_eq!(fetched_updated.contacto.as_deref(), Some("CONTACTO MOD"));
-        assert_eq!(fetched_updated.direccion1.as_deref(), Some("DIAGONAL 45 # 10-20"));
+        assert_eq!(
+            fetched_updated.direccion1.as_deref(),
+            Some("DIAGONAL 45 # 10-20")
+        );
         assert_eq!(fetched_updated.ciudad.as_deref(), Some("DUITAMA"));
 
         // 5. Delete (hard delete because no purchases)
-        let del_res = perform_delete_proveedor(&db_state, created_id.clone()).await.unwrap();
+        let del_res = perform_delete_proveedor(&db_state, created_id.clone())
+            .await
+            .unwrap();
         assert!(del_res.success);
         assert_eq!(del_res.action, "deleted");
         assert!(del_res.reason.contains("Se eliminó físicamente"));
 
         // Verify it no longer exists
-        let fetch_err = perform_get_proveedor(&db_state, created_id.clone()).await.unwrap_err();
+        let fetch_err = perform_get_proveedor(&db_state, created_id.clone())
+            .await
+            .unwrap_err();
         assert_eq!(fetch_err, "Proveedor no encontrado");
     }
 
     #[tokio::test]
     async fn test_secure_delete_soft_delete() {
-        let db_state = db::create_pools().await.expect("Failed to initialize pools");
+        let db_state = db::create_pools()
+            .await
+            .expect("Failed to initialize pools");
 
         let prov_id = "900120000000001".to_string();
 
-        let before_del = perform_get_proveedor(&db_state, prov_id.clone()).await.unwrap();
+        let before_del = perform_get_proveedor(&db_state, prov_id.clone())
+            .await
+            .unwrap();
         assert_eq!(before_del.status, "A");
 
-        let del_res = perform_delete_proveedor(&db_state, prov_id.clone()).await.unwrap();
+        let del_res = perform_delete_proveedor(&db_state, prov_id.clone())
+            .await
+            .unwrap();
         assert!(del_res.success);
         assert_eq!(del_res.action, "deactivated");
         assert!(del_res.reason.contains("desactivó el registro"));
 
-        let after_del = perform_get_proveedor(&db_state, prov_id.clone()).await.unwrap();
+        let after_del = perform_get_proveedor(&db_state, prov_id.clone())
+            .await
+            .unwrap();
         assert_eq!(after_del.status, "I");
 
         let restore_input = UpdateProveedorInput {
@@ -695,6 +744,8 @@ mod tests {
             departamento: after_del.departamento,
             status: Some("A".to_string()),
         };
-        perform_update_proveedor(&db_state, prov_id.clone(), restore_input).await.unwrap();
+        perform_update_proveedor(&db_state, prov_id.clone(), restore_input)
+            .await
+            .unwrap();
     }
 }

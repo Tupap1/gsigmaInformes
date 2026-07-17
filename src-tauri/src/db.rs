@@ -1,4 +1,4 @@
-use sqlx::{MySqlPool, mysql::MySqlPoolOptions};
+use sqlx::{mysql::MySqlPoolOptions, MySqlPool};
 use std::env;
 
 #[derive(Clone)]
@@ -49,16 +49,28 @@ pub async fn create_pools() -> Result<AppDb, sqlx::Error> {
     let write_password = env::var("DB_WRITE_PASSWORD").expect("DB_WRITE_PASSWORD must be set");
 
     // Construir URLs de conexión desactivando SSL para compatibilidad con MySQL 5.5 local
-    let read_url = format!("mysql://{}:{}@{}:{}/?ssl-mode=disabled", read_user, read_password, host, port);
-    let write_url = format!("mysql://{}:{}@{}:{}/?ssl-mode=disabled", write_user, write_password, host, port);
+    let read_url = format!(
+        "mysql://{}:{}@{}:{}/?ssl-mode=disabled",
+        read_user, read_password, host, port
+    );
+    let write_url = format!(
+        "mysql://{}:{}@{}:{}/?ssl-mode=disabled",
+        write_user, write_password, host, port
+    );
 
-    println!("Connecting to Read Pool using URL: mysql://{}@{}:{}/", read_user, host, port);
+    println!(
+        "Connecting to Read Pool using URL: mysql://{}@{}:{}/",
+        read_user, host, port
+    );
     let read_pool = MySqlPoolOptions::new()
         .max_connections(5)
         .connect(&read_url)
         .await?;
 
-    println!("Connecting to Write Pool using URL: mysql://{}@{}:{}/", write_user, host, port);
+    println!(
+        "Connecting to Write Pool using URL: mysql://{}@{}:{}/",
+        write_user, host, port
+    );
     let write_pool = MySqlPoolOptions::new()
         .max_connections(5)
         .connect(&write_url)
@@ -77,7 +89,7 @@ mod tests {
     #[tokio::test]
     async fn test_pools() {
         let db = create_pools().await.expect("Failed to create pools");
-        
+
         // Test read pool with SELECT 1
         let read_row: i32 = sqlx::query_scalar("SELECT 1")
             .fetch_one(&db.read_pool)

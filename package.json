@@ -16,11 +16,17 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@tauri-apps/plugin-fs": "^2.5.1",
+    "@tauri-apps/plugin-process": "^2.0.0",
+    "@tauri-apps/plugin-updater": "^2.10.1",
+    "@types/pdfmake": "^0.3.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "morgan": "^1.10.0",
-    "mysql2": "^3.9.7"
+    "mysql2": "^3.9.7",
+    "pdfmake": "^0.3.11"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.6",

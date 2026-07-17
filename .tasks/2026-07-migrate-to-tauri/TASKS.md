@@ -41,10 +41,10 @@
 - [x] **T5.2** Comando `get_productos` → mismo archivo — Test: retorna lista de PAS con PASCOMP=1
 - [x] **T5.3** Vista informe con filtros y tabla → `src/routes/informes/+page.svelte` — Test: genera tabla con datos correctos
 - [x] **T5.4** Resumen de caja visual (tarjetas financieras) → mismo archivo — Test: cálculos coinciden con datos manuales
-- [ ] **T5.5** Generación PDF réplica y Diálogo de Guardado Nativo → `src/lib/pdf.ts` & `src/routes/informes/+page.svelte` — Test: hacer clic en "Exportar PDF" abre el diálogo de guardado de Windows y guarda el PDF en la ruta seleccionada.
+- [x] **T5.5** Generación PDF réplica y Diálogo de Guardado Nativo → `src/lib/pdf.ts` & `src/routes/informes/+page.svelte` — Test: hacer clic en "Exportar PDF" abre el diálogo de guardado de Windows y guarda el PDF en la ruta seleccionada.
 
 ## Fase 6: Auto-Updater + CI/CD
-- [ ] **T6.1** Generar keypair de firma → almacenar en GitHub Secrets — Test: `tauri signer generate` exitoso
-- [ ] **T6.2** Configurar updater en `tauri.conf.json` → `src-tauri/tauri.conf.json` — Test: app chequea endpoint al iniciar
-- [ ] **T6.3** Crear workflow `release.yml` → `.github/workflows/release.yml` — Test: push tag `v0.1.0` → .msi en GitHub Releases
+- [x] **T6.1** Generar keypair de firma → almacenar en GitHub Secrets — Test: `tauri signer generate` exitoso
+- [x] **T6.2** Configurar updater en `tauri.conf.json` → `src-tauri/tauri.conf.json` — Test: app chequea endpoint al iniciar
+- [x] **T6.3** Crear workflow `release.yml` → `.github/workflows/release.yml` — Test: push tag `v0.1.0` → .msi en GitHub Releases
 - [ ] **T6.4** Verificar auto-update end-to-end → instalar v0.1.0, publicar v0.2.0 — Test: app detecta y aplica actualización

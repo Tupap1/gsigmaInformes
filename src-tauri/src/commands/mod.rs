@@ -1,7 +1,8 @@
-use tauri::State;
 use crate::db::AppDb;
 use serde::Serialize;
+use tauri::State;
 
+pub mod informes;
 pub mod proveedores;
 
 #[derive(Serialize, Debug, Clone, PartialEq, Eq)]

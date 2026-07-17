@@ -27,3 +27,7 @@ sqlx = { version = "0.8", features = ["runtime-tokio", "mysql"] }
 tokio = { version = "1", features = ["full"] }
 dotenvy = "0.15"
 chrono = { version = "0.4", features = ["serde"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { toasts } from '$lib/stores/toasts';
+  import { toasts } from '$lib/stores/toasts.svelte';
   import { fade, slide } from 'svelte/transition';
 </script>
 

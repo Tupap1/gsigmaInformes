@@ -88,9 +88,7 @@
   .sidebar {
     width: var(--sidebar-width);
     height: 100vh;
-    background: rgba(13, 20, 37, 0.7);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
+    background: var(--bg-secondary);
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
@@ -98,65 +96,62 @@
   }
 
   .sidebar-header {
-    padding: 30px 24px;
+    padding: 24px 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   }
 
   .logo {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
   }
 
   .logo-icon {
-    font-size: 28px;
-    animation: pulse-logo 3s infinite ease-in-out;
+    font-size: 22px;
   }
 
   .logo-text {
-    font-size: 20px;
-    font-weight: 800;
-    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    letter-spacing: -0.03em;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
   }
 
   .subtitle {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.25em;
-    margin-left: 38px;
-    margin-top: -4px;
+    letter-spacing: 0.2em;
+    margin-left: 30px;
+    margin-top: -3px;
   }
 
   .sidebar-nav {
     flex: 1;
-    padding: 24px 16px;
+    padding: 16px 12px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
 
   .nav-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border-radius: 12px;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 6px;
     color: var(--text-secondary);
     text-decoration: none;
     font-weight: 500;
-    font-size: 14px;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 13.5px;
+    border: 1px solid transparent;
+    transition: all 0.1s ease;
   }
 
   .nav-item:hover {
     color: var(--text-primary);
     background: rgba(255, 255, 255, 0.03);
-    transform: translateX(3px);
   }
 
   .nav-item.active {
@@ -166,35 +161,31 @@
     font-weight: 600;
   }
 
-  .nav-item.active .nav-icon {
-    filter: drop-shadow(0 0 5px var(--accent-green-glow));
-  }
-
   .nav-icon {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .sidebar-footer {
-    padding: 20px;
+    padding: 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.03);
   }
 
   .db-status-panel {
-    background: rgba(9, 14, 26, 0.5);
+    background: rgba(9, 14, 26, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.03);
-    border-radius: 14px;
-    padding: 14px;
+    border-radius: 6px;
+    padding: 12px;
   }
 
   .db-status-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
   .panel-title {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -205,10 +196,10 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    font-size: 11px;
+    font-size: 10px;
     padding: 2px;
     opacity: 0.5;
-    transition: opacity 0.2s, transform 0.2s;
+    transition: opacity 0.15s;
   }
 
   .refresh-btn:hover {
@@ -226,8 +217,8 @@
   .status-row {
     display: flex;
     align-items: center;
-    font-size: 12px;
-    margin-top: 6px;
+    font-size: 11.5px;
+    margin-top: 5px;
   }
 
   .status-indicator {
@@ -240,12 +231,12 @@
 
   .status-indicator.active {
     background: var(--accent-green);
-    box-shadow: 0 0 6px var(--accent-green);
+    box-shadow: 0 0 6px var(--accent-green-glow);
   }
 
   .status-indicator.inactive {
     background: var(--accent-red);
-    box-shadow: 0 0 6px var(--accent-red);
+    box-shadow: 0 0 6px var(--accent-red-glow);
   }
 
   .status-label {
@@ -256,11 +247,7 @@
   .status-val {
     color: var(--text-primary);
     font-weight: 500;
-  }
-
-  @keyframes pulse-logo {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.06); }
+    font-family: monospace;
   }
 
   @keyframes spin {
