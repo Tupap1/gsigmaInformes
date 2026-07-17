@@ -1,0 +1,27 @@
+# Estado — Migración a Tauri + Rust + SvelteKit
+
+## Estado actual: `fase4_completed`
+
+## Resumen
+Migración completa del stack Node.js+Express+Vanilla a Tauri v2+Rust+SvelteKit. Incluye reescritura del backend en Rust (comandos IPC), nuevo frontend en SvelteKit con diseño premium, y sistema de auto-actualización con firma criptográfica.
+
+## Fases
+| Fase | Descripción | Estado |
+|------|-------------|--------|
+| 1 | Scaffolding Tauri + SvelteKit | `completed` |
+| 2 | Conexión MySQL desde Rust | `completed` |
+| 3 | CRUD Proveedores en Rust | `completed` |
+| 4 | Frontend SvelteKit — Layout y Proveedores | `completed` |
+| 5 | Informes + PDF | `pending` |
+| 6 | Auto-Updater + CI/CD | `pending` |
+
+## Bloqueantes
+- Decisión: ¿`sqlx` o `mysql_async` como driver MySQL en Rust? (Resuelto: Se verificó que `sqlx` v0.8 es 100% compatible con MySQL 5.5 y los pools de conexión independientes)
+- Decisión: ¿PDF se genera en JS (pdfmake) o en Rust?
+
+## Historial
+| Fecha | Evento |
+|-------|--------|
+| 2026-07-17 | Creación de spec: REQUIREMENTS.md, PLAN.md, TASKS.md, STATUS.md |
+| 2026-07-17 | Fase 0 (Rust + VS Build Tools) y Fase 1 (Scaffolding Tauri v2 + SvelteKit) completadas con éxito |
+| 2026-07-17 | Fase 4 (Frontend SvelteKit — Layout y Proveedores) completada con éxito |

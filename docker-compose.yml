@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:5.5
+    container_name: recicladora-db-dev
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: devrootpassword
+    command: --lower-case-table-names=1
+    ports:
+      - "3309:3306"
+    volumes:
+      - ./db-init:/docker-entrypoint-initdb.d
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:
