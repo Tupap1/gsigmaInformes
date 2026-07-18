@@ -1,4 +1,4 @@
-use crate::db::AppDb;
+use crate::db::{AppDb, AppState, get_db};
 use crate::models::proveedor::{
     CreateProveedorInput, DeleteResult, Proveedor, UpdateProveedorInput,
 };
@@ -118,6 +118,11 @@ pub async fn perform_create_proveedor(
                 .to_string(),
         );
     }
+
+    if tipo_doc == "N" {
+        crate::utils::validation::validate_nit(trimmed_doc)?;
+    }
+
 
     let empid = std::env::var("DB_EMPID").unwrap_or_else(|_| "000000000000001".to_string());
 
@@ -315,19 +320,25 @@ pub async fn perform_update_proveedor(
             "Ocurrió un error interno en el servidor.".to_string()
         })?;
 
-    let existing_prov: Option<String> =
-        sqlx::query_scalar("SELECT PROCOD FROM pv.proveedo WHERE TRIM(PROCOD) = ?")
+    let existing: Option<(String, String)> =
+        sqlx::query_as("SELECT PROTIPDOC, PRONUMDOC FROM pv.proveedo WHERE TRIM(PROCOD) = ?")
             .bind(trimmed_id)
             .fetch_optional(&mut *tx)
             .await
             .map_err(|e| {
-                log::error!("Error checking supplier existence: {:?}", e);
+                log::error!("Error checking supplier existence and document type: {:?}", e);
                 "Ocurrió un error interno en el servidor.".to_string()
             })?;
 
-    if existing_prov.is_none() {
-        return Err("Proveedor no encontrado.".to_string());
+    let (tipo_doc, num_doc) = match existing {
+        Some((t, n)) => (t, n),
+        None => return Err("Proveedor no encontrado.".to_string()),
+    };
+
+    if tipo_doc.trim() == "N" {
+        crate::utils::validation::validate_nit(num_doc.trim())?;
     }
+
 
     let nombre_upper = trimmed_name.to_uppercase();
     let apellido_upper = map_upper_or_empty(&input.apellido);
@@ -521,36 +532,41 @@ pub async fn perform_delete_proveedor(db: &AppDb, id: String) -> Result<DeleteRe
 // Tauri Command Wrappers
 #[tauri::command]
 pub async fn list_proveedores(
-    db: State<'_, AppDb>,
+    app_state: State<'_, AppState>,
     include_inactive: Option<bool>,
 ) -> Result<Vec<Proveedor>, String> {
+    let db = get_db(&app_state).await?;
     perform_list_proveedores(&db, include_inactive).await
 }
 
 #[tauri::command]
-pub async fn get_proveedor(db: State<'_, AppDb>, id: String) -> Result<Proveedor, String> {
+pub async fn get_proveedor(app_state: State<'_, AppState>, id: String) -> Result<Proveedor, String> {
+    let db = get_db(&app_state).await?;
     perform_get_proveedor(&db, id).await
 }
 
 #[tauri::command]
 pub async fn create_proveedor(
-    db: State<'_, AppDb>,
+    app_state: State<'_, AppState>,
     input: CreateProveedorInput,
 ) -> Result<String, String> {
+    let db = get_db(&app_state).await?;
     perform_create_proveedor(&db, input).await
 }
 
 #[tauri::command]
 pub async fn update_proveedor(
-    db: State<'_, AppDb>,
+    app_state: State<'_, AppState>,
     id: String,
     input: UpdateProveedorInput,
 ) -> Result<(), String> {
+    let db = get_db(&app_state).await?;
     perform_update_proveedor(&db, id, input).await
 }
 
 #[tauri::command]
-pub async fn delete_proveedor(db: State<'_, AppDb>, id: String) -> Result<DeleteResult, String> {
+pub async fn delete_proveedor(app_state: State<'_, AppState>, id: String) -> Result<DeleteResult, String> {
+    let db = get_db(&app_state).await?;
     perform_delete_proveedor(&db, id).await
 }
 

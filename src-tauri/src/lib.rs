@@ -1,15 +1,38 @@
 pub mod commands;
+pub mod config;
 pub mod db;
 pub mod models;
 pub mod utils;
 
+use db::AppState;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // Pre-initialize connection pools using block_on
-    let db_state = tauri::async_runtime::block_on(async {
-        db::create_pools()
-            .await
-            .expect("Failed to initialize database pools")
+    // Intentar cargar config.json y conectar automáticamente.
+    // Si no existe, arrancar en "Modo Inicialización".
+    let app_state = tauri::async_runtime::block_on(async {
+        match config::load_config(None) {
+            Some(cfg) => {
+                // Config existe: intentar conectar con usuarios limitados
+                match db::create_pools_from_config(&cfg).await {
+                    Ok(db) => {
+                        println!("✅ Configuración cargada. Pools inicializados.");
+                        AppState::with_db(db)
+                    }
+                    Err(e) => {
+                        eprintln!(
+                            "⚠️ Config existe pero no se pudo conectar: {}. Entrando en Modo Inicialización.",
+                            e
+                        );
+                        AppState::new()
+                    }
+                }
+            }
+            None => {
+                println!("🔧 No se encontró config.json. Entrando en Modo Inicialización.");
+                AppState::new()
+            }
+        }
     });
 
     tauri::Builder::default()
@@ -17,9 +40,11 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .manage(db_state) // Manage AppDb state
+        .manage(app_state)
         .invoke_handler(tauri::generate_handler![
             commands::test_connection,
+            commands::setup::setup_db_connection,
+            commands::setup::check_configured,
             commands::proveedores::list_proveedores,
             commands::proveedores::get_proveedor,
             commands::proveedores::create_proveedor,

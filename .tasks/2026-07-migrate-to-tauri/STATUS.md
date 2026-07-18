@@ -1,6 +1,6 @@
 # Estado — Migración a Tauri + Rust + SvelteKit
 
-## Estado actual: `nit_validation_in_progress`
+## Estado actual: `nit_validation_completed`
 
 ## Resumen
 Migración completa del stack Node.js+Express+Vanilla a Tauri v2+Rust+SvelteKit. Incluye reescritura del backend en Rust (comandos IPC), nuevo frontend en SvelteKit con diseño premium, y sistema de auto-actualización con firma criptográfica.
@@ -28,3 +28,5 @@ Migración completa del stack Node.js+Express+Vanilla a Tauri v2+Rust+SvelteKit.
 | 2026-07-17 | Fase 5 en progreso: Reabierta tarea T5.5 para implementar la previsualización del PDF en línea y selección de ruta nativa de guardado |
 | 2026-07-17 | Fase 5 (Informes + PDF) completada exitosamente. Integrado diálogo nativo y guardado directo. |
 | 2026-07-17 | Incorporación de requerimiento para verificar el Dígito de Verificación (DV) del NIT colombiano con algoritmo de la DIAN. |
+| 2026-07-17 | Implementación y verificación de la validación del Dígito de Verificación (DV) del NIT colombiano en backend (T3.8) y frontend (T4.8). |
+

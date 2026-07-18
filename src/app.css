@@ -3,39 +3,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Color Palette - Premium Calibrated Grays (No flashy blues/purples) */
-  --bg-primary: #0a0f1d;
-  --bg-secondary: #0d1425;
-  --bg-card: rgba(15, 23, 42, 0.45);
-  --bg-card-hover: rgba(22, 32, 59, 0.55);
-  --border-color: rgba(255, 255, 255, 0.05);
-  --border-color-hover: rgba(255, 255, 255, 0.09);
-  --border-active: rgba(16, 185, 129, 0.25);
+  /* Flat Professional Neutral Theme (Charcoal / Gray) */
+  --bg-primary: #121214;
+  --bg-secondary: #1a1a1e;
+  --bg-card: #1e1e22;
+  --bg-card-hover: #25252b;
+  --border-color: #2a2a30;
+  --border-color-hover: #35353d;
+  --border-active: #16a34a;
   
-  /* Ecological Green Accents (Used Selectively) */
-  --accent-green: #10b981;
-  --accent-green-hover: #059669;
-  --accent-green-light: rgba(16, 185, 129, 0.06);
-  --accent-green-glow: rgba(16, 185, 129, 0.12);
+  /* Ecological Green Accents (Flat, no glow) */
+  --accent-green: #16a34a;
+  --accent-green-hover: #15803d;
+  --accent-green-light: rgba(22, 163, 74, 0.1);
   
-  /* Accent Reds (Destructive actions) */
-  --accent-red: #ef4444;
-  --accent-red-hover: #dc2626;
-  --accent-red-light: rgba(239, 68, 68, 0.06);
-  --accent-red-glow: rgba(239, 68, 68, 0.12);
+  /* Accent Reds (Flat, no glow) */
+  --accent-red: #dc2626;
+  --accent-red-hover: #b91c1c;
+  --accent-red-light: rgba(220, 38, 38, 0.1);
 
   /* Neutrals & Text */
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
   
   /* Fonts & Spacing */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --sidebar-width: 240px;
   
-  /* Shadows & Glassmorphism */
-  --shadow-premium: 0 8px 20px -6px rgba(0, 0, 0, 0.6);
-  --glass-blur: blur(12px);
+  /* Shadows & Glassmorphism (Flat style) */
+  --shadow-premium: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --glass-blur: none;
 }
 
 /* Base resets */
@@ -47,9 +45,6 @@
 
 body {
   background-color: var(--bg-primary);
-  background-image: 
-    radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.01) 0%, transparent 60%),
-    radial-gradient(circle at 50% 100%, rgba(13, 20, 37, 0.2) 0%, var(--bg-primary) 100%);
   color: var(--text-primary);
   font-family: var(--font-sans);
   height: 100vh;
@@ -99,15 +94,13 @@ h1, h2, h3, h4, h5, h6 {
   position: relative;
 }
 
-/* Premium Card / Glassmorphism */
+/* Premium Card / Flat Panel */
 .glass-panel {
   background: var(--bg-card);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 6px;
   box-shadow: var(--shadow-premium);
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
 }
 
 .glass-panel:hover {
@@ -127,12 +120,12 @@ button, .btn {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: all 0.12s ease;
+  transition: all 0.1s ease;
 }
 
 .btn-primary {
   background: var(--accent-green);
-  color: #042f1a;
+  color: #ffffff;
 }
 
 .btn-primary:hover {
@@ -174,21 +167,20 @@ button, .btn {
 }
 
 .form-control {
-  background: rgba(13, 20, 37, 0.45);
+  background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-color);
   border-radius: 6px;
   color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 13px;
   padding: 8px 12px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.12s ease;
   width: 100%;
 }
 
 .form-control:focus {
   outline: none;
   border-color: var(--accent-green);
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
 }
 
 .form-control::placeholder {
@@ -212,19 +204,19 @@ button, .btn {
 }
 
 .skeleton-shimmer {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.02) 25%, rgba(255, 255, 255, 0.06) 50%, rgba(255, 255, 255, 0.02) 75%);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.02) 25%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.02) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.8s infinite;
 }
 
 /* Base Micro-animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(3px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.15s ease-out forwards;
 }
 
 @keyframes slideInRight {
@@ -233,5 +225,5 @@ button, .btn {
 }
 
 .animate-slide-in-right {
-  animation: slideInRight 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideInRight 0.15s ease-out forwards;
 }

@@ -120,5 +120,14 @@ export const api = {
 
   async getResumenCaja(fechaInicio: string, fechaFin: string): Promise<ResumenCaja> {
     return invoke<ResumenCaja>('get_resumen_caja', { fechaInicio, fechaFin });
+  },
+
+  // Setup / Configuration
+  async checkConfigured(): Promise<boolean> {
+    return invoke<boolean>('check_configured');
+  },
+
+  async setupDbConnection(host: string, port: number, rootPassword: string): Promise<void> {
+    return invoke<void>('setup_db_connection', { host, port, rootPassword });
   }
 };

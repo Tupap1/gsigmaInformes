@@ -33,6 +33,114 @@
   let departamento = $state('');
   let status = $state('A');
 
+  // NIT Colombian DV Validation Algorithm (Modulo 11)
+  function calculateDV(base: string): number {
+    const weights = [3, 7, 13, 17, 19, 23, 29, 37, 41, 43, 47, 53, 59, 67, 71];
+    let sum = 0;
+    
+    // Reverse base and sum multiplied digits
+    const cleanedBase = base.replace(/[\s.,-]/g, '');
+    for (let i = 0; i < cleanedBase.length; i++) {
+      const char = cleanedBase.charAt(cleanedBase.length - 1 - i);
+      const digit = parseInt(char, 10);
+      if (!isNaN(digit)) {
+        const weight = weights[i % weights.length];
+        sum += digit * weight;
+      }
+    }
+    
+    const remainder = sum % 11;
+    if (remainder <= 1) {
+      return remainder;
+    } else {
+      return 11 - remainder;
+    }
+  }
+
+  interface NitValidationResult {
+    isValid: boolean;
+    errorMsg?: string;
+    parsedBase?: string;
+    expectedDV?: number;
+    providedDV?: number;
+    hasDV?: boolean;
+  }
+
+  function validateNit(nitStr: string): NitValidationResult {
+    // Remove dots, spaces, commas
+    const cleaned = nitStr.replace(/[\s.,]/g, '');
+    if (!cleaned) {
+      return { isValid: false, errorMsg: 'El número de identificación está vacío.' };
+    }
+
+    const parts = cleaned.split('-');
+    if (parts.length > 2) {
+      return { isValid: false, errorMsg: 'El NIT no puede contener más de un guión.' };
+    }
+
+    if (parts.length === 2) {
+      const base = parts[0];
+      const dvStr = parts[1];
+      if (!base || !/^\d+$/.test(base)) {
+        return { isValid: false, errorMsg: 'La parte base del NIT debe contener solo números.' };
+      }
+      if (dvStr.length !== 1 || !/^\d+$/.test(dvStr)) {
+        return { isValid: false, errorMsg: 'El dígito de verificación debe ser un único número.' };
+      }
+      const providedDV = parseInt(dvStr, 10);
+      const expectedDV = calculateDV(base);
+      if (providedDV !== expectedDV) {
+        return { 
+          isValid: false, 
+          errorMsg: `Dígito de verificación incorrecto. Esperado: ${expectedDV}, Ingresado: ${providedDV}`,
+          parsedBase: base,
+          expectedDV,
+          providedDV,
+          hasDV: true
+        };
+      }
+      return { isValid: true, parsedBase: base, expectedDV, providedDV, hasDV: true };
+    } else {
+      // No hyphen
+      const digits = parts[0];
+      if (!digits || !/^\d+$/.test(digits)) {
+        return { isValid: false, errorMsg: 'El NIT debe contener solo números.' };
+      }
+
+      if (digits.length === 10) {
+        // Treat 10th digit as DV
+        const base = digits.substring(0, 9);
+        const dvStr = digits.substring(9);
+        const providedDV = parseInt(dvStr, 10);
+        const expectedDV = calculateDV(base);
+        if (providedDV !== expectedDV) {
+          return { 
+            isValid: false, 
+            errorMsg: `Dígito de verificación incorrecto. Esperado: ${expectedDV}, Ingresado: ${providedDV}`,
+            parsedBase: base,
+            expectedDV,
+            providedDV,
+            hasDV: true
+          };
+        }
+        return { isValid: true, parsedBase: base, expectedDV, providedDV, hasDV: true };
+      } else {
+        // Treated as simple number
+        const expectedDV = calculateDV(digits);
+        return { isValid: true, parsedBase: digits, expectedDV, hasDV: false };
+      }
+    }
+  }
+
+  // Reactive state derived from form inputs
+  const nitValidation = $derived.by(() => {
+    if (tipoDoc !== 'N') return { isValid: true };
+    return validateNit(numDoc);
+  });
+
+  const isNitValid = $derived(nitValidation.isValid);
+
+
   // Fetch Suppliers
   async function fetchSuppliers() {
     loading = true;
@@ -119,6 +227,12 @@
       toasts.error('El número de identificación es requerido.');
       return;
     }
+
+    if (tipoDoc === 'N' && !isNitValid) {
+      toasts.error(nitValidation.errorMsg || 'El dígito de verificación del NIT es incorrecto.');
+      return;
+    }
+
 
     saving = true;
     try {
@@ -209,14 +323,13 @@
       <p class="page-subtitle">Catálogo centralizado de proveedores del POS en producción</p>
     </div>
     <button class="btn btn-primary" onclick={openCreateForm}>
-      <span>➕</span> Registrar Tercero
+      Registrar Tercero
     </button>
   </div>
 
   <!-- Filters Panel -->
   <div class="filters-card glass-panel">
     <div class="search-box">
-      <span class="search-icon">🔍</span>
       <input 
         type="text" 
         placeholder="Buscar por nombre, apellidos, identificación o código..." 
@@ -241,7 +354,6 @@
       <SkeletonLoader type="table-row" count={8} />
     {:else if filteredSuppliers.length === 0}
       <div class="empty-state">
-        <span class="empty-icon">👥</span>
         <h3>No se encontraron registros de terceros</h3>
         <p>Ajuste el término de búsqueda o habilite la inclusión de inactivos</p>
       </div>
@@ -279,11 +391,11 @@
                 </span>
               </td>
               <td class="actions-cell">
-                <button class="action-btn edit" onclick={() => openEditForm(supplier)} title="Editar tercero">
-                  ✏️
+                <button class="action-link edit" onclick={() => openEditForm(supplier)} title="Editar tercero">
+                  Editar
                 </button>
-                <button class="action-btn delete" onclick={() => supplierToDelete = supplier} title="Desactivar/Eliminar tercero">
-                  🗑️
+                <button class="action-link delete" onclick={() => supplierToDelete = supplier} title="Desactivar/Eliminar tercero">
+                  Eliminar
                 </button>
               </td>
             </tr>
@@ -322,13 +434,26 @@
               <input 
                 id="numDoc" 
                 type="text" 
-                class="form-control" 
-                placeholder="Ej. 12345678" 
+                class="form-control {tipoDoc === 'N' && !isNitValid ? 'is-invalid' : ''}" 
+                placeholder={tipoDoc === 'N' ? 'Ej. 800197268-4' : 'Ej. 12345678'} 
                 bind:value={numDoc} 
                 disabled={formMode === 'edit'} 
                 required 
               />
+              {#if tipoDoc === 'N' && !isNitValid}
+                <div class="invalid-feedback mt-1" style="font-size: 0.85rem; color: #ef4444; font-weight: 500;">
+                  ⚠️ {nitValidation.errorMsg}
+                </div>
+              {:else if tipoDoc === 'N' && nitValidation.isValid && nitValidation.expectedDV !== undefined}
+                <div class="valid-feedback mt-1" style="font-size: 0.85rem; color: #10b981; font-weight: 500;">
+                  ✓ Dígito de verificación: {nitValidation.expectedDV}
+                  {#if !nitValidation.hasDV}
+                    <span style="opacity: 0.8; font-weight: normal;"> (Sugerido para completar)</span>
+                  {/if}
+                </div>
+              {/if}
             </div>
+
           </div>
 
           <div class="form-group">
@@ -454,9 +579,10 @@
           <button type="button" class="btn btn-secondary" onclick={() => showFormPanel = false}>
             Cancelar
           </button>
-          <button type="submit" class="btn btn-primary" disabled={saving}>
+          <button type="submit" class="btn btn-primary" disabled={saving || (tipoDoc === 'N' && !isNitValid)}>
             {saving ? 'Guardando...' : 'Guardar Registro'}
           </button>
+
         </div>
       </form>
     </div>
@@ -472,7 +598,6 @@
   >
     <div class="delete-warning-content animate-fade-in">
       <div class="warning-banner">
-        <span class="warning-icon">⚠️</span>
         <div class="warning-text">
           <strong>Advertencia de Integridad Contable</strong>
           <p>Esta acción se ejecutará directamente sobre la base de datos de producción.</p>
@@ -548,7 +673,7 @@
     justify-content: space-between;
     gap: 16px;
     flex-wrap: wrap;
-    background: rgba(13, 20, 37, 0.25);
+    background: var(--bg-secondary);
   }
 
   .search-box {
@@ -557,17 +682,8 @@
     min-width: 280px;
   }
 
-  .search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 14px;
-    color: var(--text-muted);
-  }
-
   .search-input {
-    padding-left: 36px;
+    padding-left: 12px;
     padding-right: 32px;
   }
 
@@ -609,7 +725,7 @@
     left: 0;
     height: 15px;
     width: 15px;
-    background-color: rgba(13, 20, 37, 0.4);
+    background-color: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: 4px;
     transition: all 0.1s;
@@ -639,7 +755,7 @@
     top: 2px;
     width: 3px;
     height: 7px;
-    border: solid #042f1a;
+    border: solid #ffffff;
     border-width: 0 1.5px 1.5px 0;
     transform: rotate(45deg);
   }
@@ -647,7 +763,7 @@
   /* Table styles - Denser structure */
   .table-container {
     overflow-x: auto;
-    background: rgba(13, 20, 37, 0.2);
+    background: var(--bg-secondary);
     border-radius: 8px;
     padding: 0;
   }
@@ -667,7 +783,7 @@
     text-transform: uppercase;
     letter-spacing: 0.04em;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    background: rgba(9, 14, 26, 0.2);
+    background: rgba(255, 255, 255, 0.01);
   }
 
   .suppliers-table td {
@@ -741,20 +857,20 @@
 
   .status-badge.active {
     background: var(--accent-green-light);
-    border-color: rgba(16, 185, 129, 0.15);
-    color: #34d399;
+    border-color: rgba(22, 163, 74, 0.15);
+    color: var(--accent-green);
   }
 
   .status-badge.inactive {
     background: var(--accent-red-light);
-    border-color: rgba(239, 68, 68, 0.15);
-    color: #f87171;
+    border-color: rgba(220, 38, 38, 0.15);
+    color: var(--accent-red);
   }
 
   /* Actions */
   .actions-header {
     text-align: right;
-    width: 80px;
+    width: 120px;
   }
 
   .actions-cell {
@@ -763,29 +879,22 @@
     gap: 6px;
   }
 
-  .action-btn {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--border-color);
+  .action-link {
+    background: transparent;
+    border: none;
     cursor: pointer;
-    font-size: 11px;
-    width: 26px;
-    height: 26px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    transition: all 0.1s ease;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding: 2px 6px;
+    transition: color 0.1s ease;
   }
 
-  .action-btn.edit:hover {
-    background: var(--accent-green-light);
-    border-color: rgba(16, 185, 129, 0.25);
+  .action-link.edit:hover {
     color: var(--accent-green);
   }
 
-  .action-btn.delete:hover {
-    background: var(--accent-red-light);
-    border-color: rgba(239, 68, 68, 0.25);
+  .action-link.delete:hover {
     color: var(--accent-red);
   }
 
@@ -794,13 +903,6 @@
     padding: 48px 16px;
     text-align: center;
     color: var(--text-secondary);
-  }
-
-  .empty-icon {
-    font-size: 32px;
-    display: block;
-    margin-bottom: 12px;
-    opacity: 0.4;
   }
 
   .empty-state h3 {
@@ -903,7 +1005,7 @@
     gap: 10px;
     padding: 14px 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.04);
-    background: rgba(9, 14, 26, 0.3);
+    background: var(--bg-primary);
   }
 
   /* Delete warning - Compact */
@@ -917,14 +1019,10 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: rgba(239, 68, 68, 0.05);
-    border: 1px solid rgba(239, 68, 68, 0.15);
+    background: var(--accent-red-light);
+    border: 1px solid rgba(220, 38, 38, 0.15);
     border-radius: 8px;
     padding: 12px;
-  }
-
-  .warning-icon {
-    font-size: 20px;
   }
 
   .warning-text strong {
@@ -941,7 +1039,7 @@
   }
 
   .supplier-details-box {
-    background: rgba(255, 255, 255, 0.01);
+    background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 12px;

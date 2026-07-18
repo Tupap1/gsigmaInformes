@@ -27,7 +27,7 @@
 - [x] **T3.6** Comando `update_proveedor` con transacción → mismo archivo — Test: actualiza campos editables
 - [x] **T3.7** Comando `delete_proveedor` con borrado seguro → mismo archivo — Test: hard-delete sin compras, soft-delete con compras
 - [x] **T3.8** Lógica de validación de NIT (DIAN Módulo 11) en Rust ➔ `src-tauri/src/utils/validation.rs` — Test: `cargo test test_nit_validation` valida casos válidos y erróneos
-- [ ] **T3.9** Comando `setup_db_connection` en Rust (conexión temporal as root, creación/GRANT de reci_read y reci_write en MySQL, y guardado de `config.json` en AppData) ➔ `src-tauri/src/commands/db_init.rs` — Test: `cargo test test_setup_db` con root pass de Docker
+- [x] **T3.9** Comando `setup_db_connection` en Rust (conexión temporal as root, creación/GRANT de reci_read y reci_write en MySQL, y guardado de `config.json` en AppData) ➔ `src-tauri/src/commands/setup.rs` — Test: `cargo test test_setup_db_connection` con root pass de Docker
 
 ## Fase 4: Frontend SvelteKit — Layout y Proveedores
 - [x] **T4.1** Design system CSS (dark mode, variables, animaciones) → `src/app.css` — Test: visual review
@@ -38,7 +38,7 @@
 - [x] **T4.6** Formulario crear/editar proveedor → mismo archivo — Test: crear proveedor → aparece en lista
 - [x] **T4.7** Modal borrado seguro con feedback → mismo archivo — Test: soft/hard delete muestra mensaje correcto
 - [x] **T4.8** Integración de validación de NIT colombiano en el formulario de creación/edición ➔ `src/routes/proveedores/+page.svelte` — Test: NITs inválidos muestran alerta en tiempo real y bloquean el envío.
-- [ ] **T4.9** Vista/Modal del Asistente de Configuración Inicial (Wizard) ➔ `src/routes/+page.svelte` — Test: si la app no está configurada, bloquea navegación, pide Host/Port/Clave root y realiza la llamada exitosa.
+- [x] **T4.9** Vista/Modal del Asistente de Configuración Inicial (Wizard) ➔ `src/routes/+page.svelte` — Test: si la app no está configurada, bloquea navegación, pide Host/Port/Clave root y realiza la llamada exitosa.
 
 ## Fase 5: Informes + PDF
 - [x] **T5.1** Comandos Rust `get_compras_acumuladas` + `get_resumen_caja` → `src-tauri/src/commands/informes.rs` — Test: `cargo test` con datos seed

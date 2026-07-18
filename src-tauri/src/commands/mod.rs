@@ -1,9 +1,10 @@
-use crate::db::AppDb;
+use crate::db::{AppDb, AppState, get_db};
 use serde::Serialize;
 use tauri::State;
 
 pub mod informes;
 pub mod proveedores;
+pub mod setup;
 
 #[derive(Serialize, Debug, Clone, PartialEq, Eq)]
 pub struct ConnectionStatus {
@@ -31,7 +32,8 @@ pub async fn perform_test_connection(db: &AppDb) -> ConnectionStatus {
 }
 
 #[tauri::command]
-pub async fn test_connection(db: State<'_, AppDb>) -> Result<ConnectionStatus, String> {
+pub async fn test_connection(app_state: State<'_, AppState>) -> Result<ConnectionStatus, String> {
+    let db = get_db(&app_state).await?;
     Ok(perform_test_connection(&db).await)
 }
 
