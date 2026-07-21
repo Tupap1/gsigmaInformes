@@ -31,3 +31,4 @@ Migración completa del stack Node.js+Express+Vanilla a Tauri v2+Rust+SvelteKit.
 | 2026-07-17 | Implementación y verificación de la validación del Dígito de Verificación (DV) del NIT colombiano en backend (T3.8) y frontend (T4.8). |
 | 2026-07-21 | Implementada la simplificación de NIT único, auto-cálculo e inyección del DV en el guardado, y validación de duplicados en tiempo real en la UI. |
 | 2026-07-21 | Diseñado e implementado el alternador de temas (Claro/Oscuro, Claro por defecto) y panel/modal de configuración de base de datos en el footer de la barra lateral. |
+| 2026-07-21 | Corregida la exportación de PDF (declarando Courier en pdfmake), resueltos los contrastes en las notificaciones Toasts e implementados los iconos SVG. |

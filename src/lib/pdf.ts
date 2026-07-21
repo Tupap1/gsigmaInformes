@@ -7,6 +7,22 @@ import type { CompraAcumulada, ResumenCaja } from './api';
 // Set the virtual file system for pdfmake fonts
 (pdfMake as any).vfs = (pdfFonts as any).pdfMake?.vfs || (pdfFonts as any).vfs || (pdfMake as any).vfs;
 
+// Registrar Courier y Roboto para evitar errores de compilación por falta de fuentes en vfs
+(pdfMake as any).fonts = {
+  Courier: {
+    normal: 'Courier',
+    bold: 'Courier-Bold',
+    italics: 'Courier-Oblique',
+    bolditalics: 'Courier-BoldOblique'
+  },
+  Roboto: {
+    normal: 'Roboto-Regular.ttf',
+    bold: 'Roboto-Medium.ttf',
+    italics: 'Roboto-Italic.ttf',
+    bolditalics: 'Roboto-MediumItalic.ttf'
+  }
+};
+
 // Pad utilities for aligning columns in Courier
 function padRight(str: string, len: number, padChar = ' '): string {
   if (str.length >= len) return str.slice(0, len);

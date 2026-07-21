@@ -12,11 +12,22 @@
     >
       <span class="toast-icon">
         {#if toast.type === 'success'}
-          ✅
+          <svg class="toast-svg success-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
         {:else if toast.type === 'error'}
-          ❌
+          <svg class="toast-svg error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
         {:else}
-          ℹ️
+          <svg class="toast-svg info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
         {/if}
       </span>
       <div class="toast-content">
@@ -46,15 +57,13 @@
   .toast-card {
     pointer-events: auto;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
-    padding: 16px 20px;
-    border-radius: 14px;
-    background: rgba(13, 20, 37, 0.9);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    padding: 14px 18px;
+    border-radius: 8px;
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-premium);
     color: var(--text-primary);
     position: relative;
     overflow: hidden;
@@ -70,36 +79,40 @@
   }
 
   /* Types style */
-  .toast-card.success {
-    border-color: rgba(16, 185, 129, 0.2);
-    box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.1);
-  }
   .toast-card.success::before {
     background: var(--accent-green);
   }
 
-  .toast-card.error {
-    border-color: rgba(239, 68, 68, 0.2);
-    box-shadow: 0 10px 30px -10px rgba(239, 68, 68, 0.1);
-  }
   .toast-card.error::before {
     background: var(--accent-red);
   }
 
-  .toast-card.info {
-    border-color: rgba(59, 130, 246, 0.2);
-    box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.1);
-  }
   .toast-card.info::before {
     background: #3b82f6;
   }
 
   .toast-icon {
-    font-size: 16px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .toast-svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .toast-svg.success-icon {
+    color: var(--accent-green);
+  }
+
+  .toast-svg.error-icon {
+    color: var(--accent-red);
+  }
+
+  .toast-svg.info-icon {
+    color: #3b82f6;
   }
 
   .toast-content {
