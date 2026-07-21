@@ -3,6 +3,7 @@
   import { api } from '$lib/api';
   import { toasts } from '$lib/stores/toasts.svelte';
   import { fade } from 'svelte/transition';
+  import { getVersion } from '@tauri-apps/api/app';
 
   // Props (Svelte 5 runes)
   let { onclose } = $props<{ onclose: () => void }>();
@@ -16,6 +17,9 @@
   let loading = $state(true);
   let saving = $state(false);
 
+  let appVersion = $state('Cargando...');
+  let checkingUpdate = $state(false);
+
   // Cargar configuración existente en el onMount
   onMount(async () => {
     try {
@@ -25,10 +29,43 @@
     } catch (e: any) {
       console.error('Error cargando la configuración de BD:', e);
       toasts.error('No se pudo cargar la configuración de red actual.');
+    }
+
+    try {
+      appVersion = await getVersion();
+    } catch (e) {
+      appVersion = 'Desarrollo';
     } finally {
       loading = false;
     }
   });
+
+  async function handleCheckUpdate() {
+    checkingUpdate = true;
+    try {
+      const { check } = await import('@tauri-apps/plugin-updater');
+      const { relaunch } = await import('@tauri-apps/plugin-process');
+
+      toasts.info('Comprobando si hay nuevas actualizaciones...');
+      const update = await check();
+      
+      if (update && update.available) {
+        toasts.success(`Nueva versión v${update.version} encontrada. Descargando e instalando...`, 6000);
+        await update.downloadAndInstall();
+        toasts.success('Actualización instalada con éxito. Reiniciando...', 4000);
+        setTimeout(async () => {
+          await relaunch();
+        }, 2000);
+      } else {
+        toasts.success('La aplicación está en la versión más reciente.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      toasts.error('No se pudo comprobar actualizaciones en este entorno.');
+    } finally {
+      checkingUpdate = false;
+    }
+  }
 
   async function handleSave(e: SubmitEvent) {
     e.preventDefault();
@@ -145,7 +182,22 @@
         </div>
       {/if}
 
-      <div class="modal-footer" style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
+      <div class="version-section" style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+          Versión de la App: <strong style="color: var(--text-primary);">{appVersion}</strong>
+        </div>
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          style="padding: 6px 12px; font-size: 0.8rem;" 
+          disabled={checkingUpdate}
+          onclick={handleCheckUpdate}
+        >
+          {checkingUpdate ? 'Buscando...' : 'Buscar Actualizaciones'}
+        </button>
+      </div>
+
+      <div class="modal-footer" style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
         <button type="button" class="btn btn-secondary" onclick={onclose}>
           Cancelar
         </button>
