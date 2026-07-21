@@ -10,8 +10,8 @@ Migración completa del stack Node.js+Express+Vanilla a Tauri v2+Rust+SvelteKit.
 |------|-------------|--------|
 | 1 | Scaffolding Tauri + SvelteKit | `completed` |
 | 2 | Conexión MySQL desde Rust | `completed` |
-| 3 | CRUD Proveedores en Rust | `in_progress` |
-| 4 | Frontend SvelteKit — Layout y Proveedores | `in_progress` |
+| 3 | CRUD Proveedores en Rust | `completed` |
+| 4 | Frontend SvelteKit — Layout y Proveedores | `completed` |
 | 5 | Informes + PDF | `completed` |
 | 6 | Auto-Updater + CI/CD | `completed` |
 
@@ -29,4 +29,4 @@ Migración completa del stack Node.js+Express+Vanilla a Tauri v2+Rust+SvelteKit.
 | 2026-07-17 | Fase 5 (Informes + PDF) completada exitosamente. Integrado diálogo nativo y guardado directo. |
 | 2026-07-17 | Incorporación de requerimiento para verificar el Dígito de Verificación (DV) del NIT colombiano con algoritmo de la DIAN. |
 | 2026-07-17 | Implementación y verificación de la validación del Dígito de Verificación (DV) del NIT colombiano en backend (T3.8) y frontend (T4.8). |
-
+| 2026-07-21 | Implementada la simplificación de NIT único, auto-cálculo e inyección del DV en el guardado, y validación de duplicados en tiempo real en la UI. |

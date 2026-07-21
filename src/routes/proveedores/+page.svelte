@@ -21,7 +21,7 @@
 
   // Form Inputs
   let numDoc = $state('');
-  let tipoDoc = $state('C');
+  let tipoDoc = $state('N'); // Forzado a NIT (N) siempre por defecto
   let nombre = $state('');
   let apellido = $state('');
   let telefono1 = $state('');
@@ -140,6 +140,32 @@
 
   const isNitValid = $derived(nitValidation.isValid);
 
+  // Buscar en tiempo real si el NIT ya pertenece a otro proveedor
+  const duplicateSupplier = $derived.by(() => {
+    if (!numDoc.trim()) return null;
+    
+    // Obtener parte base numérica del NIT que se escribe en el input
+    const cleanedInput = numDoc.replace(/[\s.,-]/g, '');
+    if (cleanedInput.length < 5) return null; // Evitar búsquedas con inputs muy cortos
+    
+    // Extraer los primeros 9 dígitos para comparar bases limpias de NIT
+    const baseInput = cleanedInput.substring(0, 9);
+    
+    return suppliers.find(s => {
+      // Si estamos editando, omitir el proveedor seleccionado actualmente
+      if (formMode === 'edit' && selectedSupplier && s.id === selectedSupplier.id) {
+        return false;
+      }
+      
+      const cleanedSupplierDoc = s.numDoc.replace(/[\s.,-]/g, '');
+      const baseSupplier = cleanedSupplierDoc.substring(0, 9);
+      
+      return baseSupplier === baseInput;
+    }) || null;
+  });
+
+  const isDuplicate = $derived(duplicateSupplier !== null);
+
 
   // Fetch Suppliers
   async function fetchSuppliers() {
@@ -178,7 +204,7 @@
     
     // Reset Form fields
     numDoc = '';
-    tipoDoc = 'C';
+    tipoDoc = 'N'; // Siempre NIT
     nombre = '';
     apellido = '';
     telefono1 = '';
@@ -200,7 +226,7 @@
 
     // Load fields
     numDoc = supplier.numDoc;
-    tipoDoc = supplier.tipoDoc;
+    tipoDoc = supplier.tipoDoc || 'N'; // Siempre NIT
     nombre = supplier.nombre;
     apellido = supplier.apellido || '';
     telefono1 = supplier.telefono1 || '';
@@ -233,12 +259,25 @@
       return;
     }
 
+    if (isDuplicate) {
+      toasts.error(`Este NIT ya pertenece a otro proveedor (${duplicateSupplier?.nombre}).`);
+      return;
+    }
+
+    // Formatear automáticamente el NIT con su dígito de verificación (BASE-DV)
+    let finalNumDoc = numDoc.trim();
+    if (tipoDoc === 'N' && nitValidation.isValid && nitValidation.expectedDV !== undefined) {
+      if (!finalNumDoc.includes('-')) {
+        const cleanDigits = finalNumDoc.replace(/\D/g, '');
+        finalNumDoc = `${cleanDigits}-${nitValidation.expectedDV}`;
+      }
+    }
 
     saving = true;
     try {
       if (formMode === 'create') {
         const input: CreateProveedorInput = {
-          numDoc: numDoc.trim(),
+          numDoc: finalNumDoc,
           tipoDoc,
           nombre: nombre.trim(),
           apellido: apellido.trim() || null,
@@ -419,41 +458,39 @@
         <div class="form-section">
           <h3>Datos Básicos</h3>
           
-          <div class="form-row">
-            <div class="form-group">
-              <label for="tipoDoc">Tipo de Identificación</label>
-              <select id="tipoDoc" class="form-control custom-select" bind:value={tipoDoc} disabled={formMode === 'edit'}>
-                <option value="C">Cédula de Ciudadanía (C)</option>
-                <option value="N">NIT (N)</option>
-                <option value="E">Cédula de Extranjería (E)</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="numDoc">Número de Identificación *</label>
+          <div class="form-group">
+            <label for="numDoc">Número de Identificación (NIT) *</label>
+            <div style="display: flex; gap: 0.5rem; width: 100%;">
               <input 
                 id="numDoc" 
                 type="text" 
-                class="form-control {tipoDoc === 'N' && !isNitValid ? 'is-invalid' : ''}" 
-                placeholder={tipoDoc === 'N' ? 'Ej. 800197268-4' : 'Ej. 12345678'} 
+                class="form-control {(!isNitValid || isDuplicate) ? 'is-invalid' : ''}" 
+                placeholder="Ej. 800197268" 
                 bind:value={numDoc} 
                 disabled={formMode === 'edit'} 
                 required 
+                style="flex: 1;"
               />
-              {#if tipoDoc === 'N' && !isNitValid}
-                <div class="invalid-feedback mt-1" style="font-size: 0.85rem; color: #ef4444; font-weight: 500;">
-                  ⚠️ {nitValidation.errorMsg}
-                </div>
-              {:else if tipoDoc === 'N' && nitValidation.isValid && nitValidation.expectedDV !== undefined}
-                <div class="valid-feedback mt-1" style="font-size: 0.85rem; color: #10b981; font-weight: 500;">
-                  ✓ Dígito de verificación: {nitValidation.expectedDV}
-                  {#if !nitValidation.hasDV}
-                    <span style="opacity: 0.8; font-weight: normal;"> (Sugerido para completar)</span>
-                  {/if}
+              {#if isNitValid && nitValidation.expectedDV !== undefined}
+                <div class="dv-badge" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.375rem 0.85rem; border-radius: 0.375rem; font-weight: bold; font-family: monospace; font-size: 1.05rem; display: flex; align-items: center; justify-content: center; min-width: 3.5rem;" title="Dígito de Verificación autocalculado (DIAN)">
+                  DV: {nitValidation.expectedDV}
                 </div>
               {/if}
             </div>
 
+            {#if !isNitValid}
+              <div class="invalid-feedback mt-1" style="font-size: 0.85rem; color: #ef4444; font-weight: 500; display: block;">
+                ⚠️ {nitValidation.errorMsg}
+              </div>
+            {:else if isDuplicate}
+              <div class="invalid-feedback mt-1" style="font-size: 0.85rem; color: #f97316; font-weight: 500; display: block;">
+                ⚠️ Este NIT ya pertenece a otro proveedor: <strong>{duplicateSupplier?.nombre}</strong>.
+              </div>
+            {:else if isNitValid && nitValidation.expectedDV !== undefined}
+              <div class="valid-feedback mt-1" style="font-size: 0.85rem; color: #10b981; font-weight: 500; display: block;">
+                ✓ Dígito de verificación DIAN autocalculado con éxito. Se guardará como: {numDoc.trim().includes('-') ? numDoc.trim() : numDoc.trim() + '-' + nitValidation.expectedDV}
+              </div>
+            {/if}
           </div>
 
           <div class="form-group">
@@ -579,7 +616,7 @@
           <button type="button" class="btn btn-secondary" onclick={() => showFormPanel = false}>
             Cancelar
           </button>
-          <button type="submit" class="btn btn-primary" disabled={saving || (tipoDoc === 'N' && !isNitValid)}>
+          <button type="submit" class="btn btn-primary" disabled={saving || !isNitValid || isDuplicate}>
             {saving ? 'Guardando...' : 'Guardar Registro'}
           </button>
 

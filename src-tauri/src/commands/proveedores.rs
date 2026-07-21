@@ -111,17 +111,8 @@ pub async fn perform_create_proveedor(
     if trimmed_name.is_empty() {
         return Err("El nombre o razón social (nombre) es requerido.".to_string());
     }
-    let tipo_doc = input.tipo_doc.trim();
-    if tipo_doc != "C" && tipo_doc != "N" && tipo_doc != "E" {
-        return Err(
-            "El tipo de documento (tipoDoc) debe ser C (Cédula), N (NIT) o E (Extranjería)."
-                .to_string(),
-        );
-    }
-
-    if tipo_doc == "N" {
-        crate::utils::validation::validate_nit(trimmed_doc)?;
-    }
+    let tipo_doc = "N"; // Forzar a NIT siempre en backend para nuevos registros
+    crate::utils::validation::validate_nit(trimmed_doc)?;
 
 
     let empid = std::env::var("DB_EMPID").unwrap_or_else(|_| "000000000000001".to_string());
