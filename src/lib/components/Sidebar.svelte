@@ -29,11 +29,11 @@
     </a>
   </nav>
 
-  <!-- Footer con Alternador de Temas y Configuración de Conexión -->
+  <!-- Footer con Alternador de Temas y Configuración de Conexión (Modo Icono Solo) -->
   <div class="sidebar-footer">
     <!-- Alternador de Tema Claro / Oscuro -->
     <button 
-      class="footer-btn" 
+      class="footer-icon-btn" 
       onclick={() => theme.toggle()} 
       title={theme.current === 'light' ? 'Alternar a Modo Oscuro' : 'Alternar a Modo Claro'}
     >
@@ -49,12 +49,11 @@
           <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
         </svg>
       {/if}
-      <span class="btn-label">{theme.current === 'light' ? 'Modo Claro' : 'Modo Oscuro'}</span>
     </button>
 
     <!-- Botón de Configuración (Engranaje) -->
     <button 
-      class="footer-btn" 
+      class="footer-icon-btn" 
       onclick={() => showSettingsModal = true} 
       title="Configuración de Base de Datos"
     >
@@ -62,7 +61,6 @@
         <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
         <circle cx="12" cy="12" r="3"/>
       </svg>
-      <span class="btn-label">Configuración</span>
     </button>
   </div>
 </aside>
@@ -144,47 +142,39 @@
     font-weight: 600;
   }
 
-  /* Footer con botón de Configuración y Alternar Tema */
+  /* Footer con botón de Configuración y Alternar Tema (Modo Fila Horizontal) */
   .sidebar-footer {
-    padding: 16px 12px;
+    padding: 12px;
     border-top: 1px solid var(--border-color);
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
   }
 
-  .footer-btn {
+  .footer-icon-btn {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
-    border-radius: 6px;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
     color: var(--text-secondary);
     background: transparent;
     border: 1px solid transparent;
-    font-weight: 500;
-    font-size: 13px;
-    text-align: left;
-    width: 100%;
     cursor: pointer;
-    transition: all 0.12s ease;
+    transition: all 0.15s ease;
   }
 
-  .footer-btn:hover {
+  .footer-icon-btn:hover {
     color: var(--text-primary);
     background: var(--bg-card-hover);
     border-color: var(--border-color);
   }
 
   .footer-icon {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     flex-shrink: 0;
-  }
-
-  .btn-label {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 </style>

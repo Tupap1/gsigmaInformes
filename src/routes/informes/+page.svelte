@@ -95,7 +95,7 @@
     </div>
     {#if reportGenerated}
       <button class="btn btn-secondary" onclick={exportPDF} title="Generar Ticket Impresora PDF">
-        <span>📄</span> Exportar Ticket PDF
+        Exportar Ticket PDF
       </button>
     {/if}
   </div>
@@ -121,69 +121,85 @@
     <SkeletonLoader type="card" height="120px" count={1} />
     <SkeletonLoader type="table-row" count={5} />
   {:else if reportGenerated && resumen}
-    <!-- Financial cards grid (T5.4) -->
-    <div class="caja-grid">
-      <div class="caja-card">
-        <div class="caja-hdr">
-          <span class="card-icon">🏦</span>
-          <h4>Base Caja</h4>
+    <!-- Structured Financial Panels Layout (Grouped Layout) -->
+    <div class="financial-summary-layout">
+      <!-- Left Column: Movements (Ingresos & Egresos) -->
+      <div class="movements-column">
+        <!-- Ingresos Group -->
+        <div class="financial-group">
+          <h4 class="group-title-header">Ingresos de Caja</h4>
+          <div class="group-grid-3">
+            <div class="caja-card">
+              <div class="caja-hdr">
+                <h4>Base Caja</h4>
+              </div>
+              <div class="caja-val">${resumen.baseCaja.toLocaleString('es-CO')}</div>
+              <div class="caja-badge plus">(+) Entrada</div>
+            </div>
+
+            <div class="caja-card">
+              <div class="caja-hdr">
+                <h4>Venta Contado</h4>
+              </div>
+              <div class="caja-val">${resumen.ventasContado.toLocaleString('es-CO')}</div>
+              <div class="caja-badge plus">(+) Entrada</div>
+            </div>
+
+            <div class="caja-card">
+              <div class="caja-hdr">
+                <h4>Otros Ingresos</h4>
+              </div>
+              <div class="caja-val">${resumen.ingresos.toLocaleString('es-CO')}</div>
+              <div class="caja-badge plus">(+) Entrada</div>
+            </div>
+          </div>
         </div>
-        <div class="caja-val">${resumen.baseCaja.toLocaleString('es-CO')}</div>
-        <div class="caja-badge plus">(+) Entrada</div>
+
+        <!-- Egresos Group -->
+        <div class="financial-group" style="margin-top: 20px;">
+          <h4 class="group-title-header">Egresos de Caja</h4>
+          <div class="group-grid-2">
+            <div class="caja-card destructive">
+              <div class="caja-hdr">
+                <h4>Pagado en Compras</h4>
+              </div>
+              <div class="caja-val">${resumen.compras.toLocaleString('es-CO')}</div>
+              <div class="caja-badge minus">(-) Salida</div>
+            </div>
+
+            <div class="caja-card destructive">
+              <div class="caja-hdr">
+                <h4>Total Egresos</h4>
+              </div>
+              <div class="caja-val">${resumen.egresos.toLocaleString('es-CO')}</div>
+              <div class="caja-badge minus">(-) Salida</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="caja-card">
-        <div class="caja-hdr">
-          <span class="card-icon">📈</span>
-          <h4>Venta Contado</h4>
-        </div>
-        <div class="caja-val">${resumen.ventasContado.toLocaleString('es-CO')}</div>
-        <div class="caja-badge plus">(+) Entrada</div>
-      </div>
+      <!-- Right Column: Final Balances -->
+      <div class="balances-column">
+        <div class="financial-group" style="height: 100%; display: flex; flex-direction: column;">
+          <h4 class="group-title-header">Saldos Netos</h4>
+          <div class="balances-stack">
+            <div class="caja-card highlighted-green">
+              <div class="caja-hdr">
+                <h4>Caja Efectivo</h4>
+              </div>
+              <div class="caja-val">${resumen.cajaEfectivo.toLocaleString('es-CO')}</div>
+              <div class="caja-desc">Base + VentaContado + Ingresos - Compras - Egresos</div>
+            </div>
 
-      <div class="caja-card">
-        <div class="caja-hdr">
-          <span class="card-icon">➕</span>
-          <h4>Otros Ingresos</h4>
+            <div class="caja-card highlighted-blue">
+              <div class="caja-hdr">
+                <h4>Total en Caja</h4>
+              </div>
+              <div class="caja-val">${resumen.cajaTotal.toLocaleString('es-CO')}</div>
+              <div class="caja-desc">Caja Efectivo + Ventas Crédito (${resumen.ventasCredito.toLocaleString('es-CO')})</div>
+            </div>
+          </div>
         </div>
-        <div class="caja-val">${resumen.ingresos.toLocaleString('es-CO')}</div>
-        <div class="caja-badge plus">(+) Entrada</div>
-      </div>
-
-      <div class="caja-card destructive">
-        <div class="caja-hdr">
-          <span class="card-icon">🛒</span>
-          <h4>Pagado en Compras</h4>
-        </div>
-        <div class="caja-val">${resumen.compras.toLocaleString('es-CO')}</div>
-        <div class="caja-badge minus">(-) Salida</div>
-      </div>
-
-      <div class="caja-card destructive">
-        <div class="caja-hdr">
-          <span class="card-icon">💸</span>
-          <h4>Total Egresos</h4>
-        </div>
-        <div class="caja-val">${resumen.egresos.toLocaleString('es-CO')}</div>
-        <div class="caja-badge minus">(-) Salida</div>
-      </div>
-
-      <div class="caja-card highlighted-green">
-        <div class="caja-hdr">
-          <span class="card-icon">♻️</span>
-          <h4>Caja Efectivo</h4>
-        </div>
-        <div class="caja-val">${resumen.cajaEfectivo.toLocaleString('es-CO')}</div>
-        <div class="caja-desc">Base + VentaContado + Ingresos - Compras - Egresos</div>
-      </div>
-
-      <div class="caja-card highlighted-blue">
-        <div class="caja-hdr">
-          <span class="card-icon">💰</span>
-          <h4>Total en Caja</h4>
-        </div>
-        <div class="caja-val">${resumen.cajaTotal.toLocaleString('es-CO')}</div>
-        <div class="caja-desc">Caja Efectivo + Ventas Crédito (${resumen.ventasCredito.toLocaleString('es-CO')})</div>
       </div>
     </div>
 
@@ -197,7 +213,6 @@
         </div>
         {#if compras.length === 0}
           <div class="empty-report">
-            <span>🛒</span>
             <p>No se registraron compras en este rango de fechas.</p>
           </div>
         {:else}
@@ -266,9 +281,7 @@
     font-size: 26px;
     font-weight: 800;
     letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
   }
 
   .page-subtitle {
@@ -284,7 +297,9 @@
     align-items: flex-end;
     justify-content: space-between;
     gap: 20px;
-    background: rgba(13, 20, 37, 0.4);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
   }
 
   .filters-grid {
@@ -304,28 +319,78 @@
     padding: 0 32px;
   }
 
-  /* Caja Grid */
-  .caja-grid {
+  /* Financial Summary Grouped Layout */
+  .financial-summary-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+  }
+
+  @media (max-width: 1024px) {
+    .financial-summary-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .financial-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .group-title-header {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 6px;
+    margin-bottom: 4px;
+  }
+
+  .group-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 16px;
   }
 
-  .caja-card {
-    background: rgba(13, 20, 37, 0.4);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    padding: 20px;
+  .group-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  .balances-stack {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 16px;
+    height: 100%;
+  }
+
+  .balances-stack .caja-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .caja-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
     position: relative;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .caja-card:hover {
     transform: translateY(-2px);
     border-color: var(--border-color-hover);
+    box-shadow: var(--shadow-premium);
   }
 
   .caja-hdr {
@@ -335,19 +400,16 @@
   }
 
   .caja-hdr h4 {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-secondary);
     font-weight: 600;
   }
 
-  .card-icon {
-    font-size: 16px;
-  }
-
   .caja-val {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     color: var(--text-primary);
+    letter-spacing: -0.02em;
   }
 
   .caja-badge {
@@ -360,11 +422,19 @@
 
   .caja-badge.plus {
     background: var(--accent-green-light);
-    color: #34d399;
+    color: #10b981;
   }
 
   .caja-badge.minus {
     background: var(--accent-red-light);
+    color: #ef4444;
+  }
+
+  :global(.dark) .caja-badge.plus {
+    color: #34d399;
+  }
+
+  :global(.dark) .caja-badge.minus {
     color: #f87171;
   }
 
@@ -376,30 +446,36 @@
 
   /* Highlight card styles */
   .caja-card.highlighted-green {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.03) 100%);
-    border-color: rgba(16, 185, 129, 0.25);
-    box-shadow: 0 10px 25px -10px rgba(16, 185, 129, 0.1);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(5, 150, 105, 0.02) 100%);
+    border-color: rgba(16, 185, 129, 0.2);
   }
 
   .caja-card.highlighted-green:hover {
-    border-color: rgba(16, 185, 129, 0.5);
+    border-color: rgba(16, 185, 129, 0.4);
   }
 
   .caja-card.highlighted-green .caja-val {
+    color: #059669;
+  }
+
+  :global(.dark) .caja-card.highlighted-green .caja-val {
     color: #34d399;
   }
 
   .caja-card.highlighted-blue {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.03) 100%);
-    border-color: rgba(59, 130, 246, 0.25);
-    box-shadow: 0 10px 25px -10px rgba(59, 130, 246, 0.1);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.06) 0%, rgba(37, 99, 235, 0.02) 100%);
+    border-color: rgba(59, 130, 246, 0.2);
   }
 
   .caja-card.highlighted-blue:hover {
-    border-color: rgba(59, 130, 246, 0.5);
+    border-color: rgba(59, 130, 246, 0.4);
   }
 
   .caja-card.highlighted-blue .caja-val {
+    color: #2563eb;
+  }
+
+  :global(.dark) .caja-card.highlighted-blue .caja-val {
     color: #60a5fa;
   }
 
@@ -413,7 +489,9 @@
 
   .table-container {
     padding: 24px;
-    background: rgba(13, 20, 37, 0.3);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
   }
 
   .table-hdr {
@@ -429,7 +507,7 @@
   }
 
   .table-hdr .badge {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-primary);
     border: 1px solid var(--border-color);
     padding: 3px 10px;
     border-radius: 9999px;
@@ -452,12 +530,12 @@
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border-color);
   }
 
   .report-table td {
     padding: 14px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid var(--border-color);
   }
 
   .num-col {
@@ -490,17 +568,12 @@
     color: var(--text-secondary);
   }
 
-  .empty-report span {
-    font-size: 32px;
-    display: block;
-    margin-bottom: 12px;
-    opacity: 0.5;
-  }
-
   /* Catalog Sidebar */
   .catalog-sidebar {
     padding: 20px;
-    background: rgba(13, 20, 37, 0.4);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
     max-height: 500px;
     display: flex;
     flex-direction: column;
