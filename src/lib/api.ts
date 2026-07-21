@@ -81,6 +81,11 @@ export interface Producto {
   pasnom: string;
 }
 
+export interface DbConfig {
+  host: string;
+  port: number;
+}
+
 /**
  * API Wrapper for Tauri commands
  */
@@ -129,5 +134,13 @@ export const api = {
 
   async setupDbConnection(host: string, port: number, rootPassword: string): Promise<void> {
     return invoke<void>('setup_db_connection', { host, port, rootPassword });
+  },
+
+  async getDbConfig(): Promise<DbConfig> {
+    return invoke<DbConfig>('get_db_config');
+  },
+
+  async updateDbConnection(host: string, port: number): Promise<void> {
+    return invoke<void>('update_db_connection', { host, port });
   }
 };

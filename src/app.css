@@ -3,35 +3,69 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Flat Professional Neutral Theme (Charcoal / Gray) */
-  --bg-primary: #121214;
-  --bg-secondary: #1a1a1e;
-  --bg-card: #1e1e22;
-  --bg-card-hover: #25252b;
-  --border-color: #2a2a30;
-  --border-color-hover: #35353d;
-  --border-active: #16a34a;
+  /* =========================================================================
+     LIGHT THEME (Default)
+     ========================================================================= */
+  --bg-primary: #f9fafb; /* Light Gray */
+  --bg-secondary: #ffffff; /* Clean White */
+  --bg-card: #ffffff; /* Card Background */
+  --bg-card-hover: #f3f4f6; /* Card Hover State */
+  --border-color: #e5e7eb; /* Soft Border Line */
+  --border-color-hover: #d1d5db;
+  --border-active: #10b981; /* Brand green */
   
-  /* Ecological Green Accents (Flat, no glow) */
-  --accent-green: #16a34a;
-  --accent-green-hover: #15803d;
-  --accent-green-light: rgba(22, 163, 74, 0.1);
+  /* Ecological Green Accents */
+  --accent-green: #10b981;
+  --accent-green-hover: #059669;
+  --accent-green-light: rgba(16, 185, 129, 0.08);
   
-  /* Accent Reds (Flat, no glow) */
-  --accent-red: #dc2626;
-  --accent-red-hover: #b91c1c;
-  --accent-red-light: rgba(220, 38, 38, 0.1);
+  /* Accent Reds */
+  --accent-red: #ef4444;
+  --accent-red-hover: #dc2626;
+  --accent-red-light: rgba(239, 68, 68, 0.08);
 
   /* Neutrals & Text */
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
+  --text-primary: #111827; /* Dark Slate Gray */
+  --text-secondary: #4b5563; /* Slate Medium */
+  --text-muted: #9ca3af; /* Gray Muted */
   
   /* Fonts & Spacing */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --sidebar-width: 240px;
   
-  /* Shadows & Glassmorphism (Flat style) */
+  /* Shadows & Glassmorphism */
+  --shadow-premium: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --glass-blur: none;
+}
+
+/* =========================================================================
+   DARK THEME (Override Class)
+   ========================================================================= */
+:global(.dark) {
+  --bg-primary: #121214; /* Deep Slate */
+  --bg-secondary: #1a1a1e; /* Gray Dark */
+  --bg-card: #1e1e22; /* Card Dark */
+  --bg-card-hover: #25252b; /* Card Dark Hover */
+  --border-color: #2a2a30; /* Darker Border */
+  --border-color-hover: #35353d;
+  --border-active: #10b981;
+  
+  /* Ecological Green Accents */
+  --accent-green: #10b981;
+  --accent-green-hover: #059669;
+  --accent-green-light: rgba(16, 185, 129, 0.1);
+  
+  /* Accent Reds */
+  --accent-red: #ef4444;
+  --accent-red-hover: #dc2626;
+  --accent-red-light: rgba(239, 68, 68, 0.1);
+
+  /* Neutrals & Text */
+  --text-primary: #f3f4f6; /* Gray Light */
+  --text-secondary: #9ca3af; /* Gray Slate */
+  --text-muted: #6b7280; /* Gray Darker */
+  
+  /* Shadows & Glassmorphism */
   --shadow-premium: 0 4px 12px rgba(0, 0, 0, 0.4);
   --glass-blur: none;
 }

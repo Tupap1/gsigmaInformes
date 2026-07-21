@@ -134,6 +134,59 @@ pub async fn check_configured(
         .load(std::sync::atomic::Ordering::SeqCst))
 }
 
+#[tauri::command]
+pub async fn update_db_connection(
+    app_state: State<'_, AppState>,
+    host: String,
+    port: u16,
+) -> Result<(), String> {
+    // 1. Cargar configuración existente, o crear una nueva si no existiera
+    let mut app_config = config::load_config(None)
+        .unwrap_or_else(|| AppConfig::new(host.clone(), port));
+    
+    // 2. Actualizar host y puerto
+    app_config.host = host;
+    app_config.port = port;
+
+    // 3. Guardar la configuración actualizada
+    config::save_config(&app_config, None)?;
+
+    // 4. Intentar crear los nuevos pools con la nueva configuración
+    let db = create_pools_from_config(&app_config).await.map_err(|e| {
+        log::error!("Error creando pools al reconfigurar: {:?}", e);
+        format!("Error al conectar con los nuevos parámetros de red: {}", e)
+    })?;
+
+    // 5. Actualizar el estado global
+    {
+        let mut db_guard = app_state.db.write().await;
+        *db_guard = Some(db);
+    }
+    app_state
+        .configured
+        .store(true, std::sync::atomic::Ordering::SeqCst);
+
+    Ok(())
+}
+
+#[derive(serde::Serialize)]
+pub struct DbConfigResponse {
+    pub host: String,
+    pub port: u16,
+}
+
+#[tauri::command]
+pub async fn get_db_config() -> Result<DbConfigResponse, String> {
+    // Intentar leer la configuración guardada, retornar valores por defecto si no existe
+    let cfg = config::load_config(None)
+        .unwrap_or_else(|| AppConfig::new("127.0.0.1".to_string(), 3306));
+    
+    Ok(DbConfigResponse {
+        host: cfg.host,
+        port: cfg.port,
+    })
+}
+
 // -------------------------------------------------------------------------
 // Tests
 // -------------------------------------------------------------------------

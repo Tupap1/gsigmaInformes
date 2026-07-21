@@ -4,6 +4,7 @@
   import Sidebar from '$lib/components/Sidebar.svelte';
   import ToastContainer from '$lib/components/ToastContainer.svelte';
   import { toasts } from '$lib/stores/toasts.svelte';
+  import { theme } from '$lib/stores/theme.svelte';
   import favicon from '$lib/assets/favicon.svg';
 
   let { children } = $props();

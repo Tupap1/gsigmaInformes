@@ -45,6 +45,8 @@ pub fn run() {
             commands::test_connection,
             commands::setup::setup_db_connection,
             commands::setup::check_configured,
+            commands::setup::get_db_config,
+            commands::setup::update_db_connection,
             commands::proveedores::list_proveedores,
             commands::proveedores::get_proveedor,
             commands::proveedores::create_proveedor,
