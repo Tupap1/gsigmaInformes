@@ -101,34 +101,15 @@
       }
       return { isValid: true, parsedBase: base, expectedDV, providedDV, hasDV: true };
     } else {
-      // No hyphen
+      // Sin guion: todo el número escrito es la base (Cédula o NIT de cualquier longitud)
       const digits = parts[0];
       if (!digits || !/^\d+$/.test(digits)) {
-        return { isValid: false, errorMsg: 'El NIT debe contener solo números.' };
+        return { isValid: false, errorMsg: 'El NIT/Cédula debe contener solo números.' };
       }
 
-      if (digits.length === 10) {
-        // Treat 10th digit as DV
-        const base = digits.substring(0, 9);
-        const dvStr = digits.substring(9);
-        const providedDV = parseInt(dvStr, 10);
-        const expectedDV = calculateDV(base);
-        if (providedDV !== expectedDV) {
-          return { 
-            isValid: false, 
-            errorMsg: `Dígito de verificación incorrecto. Esperado: ${expectedDV}, Ingresado: ${providedDV}`,
-            parsedBase: base,
-            expectedDV,
-            providedDV,
-            hasDV: true
-          };
-        }
-        return { isValid: true, parsedBase: base, expectedDV, providedDV, hasDV: true };
-      } else {
-        // Treated as simple number
-        const expectedDV = calculateDV(digits);
-        return { isValid: true, parsedBase: digits, expectedDV, hasDV: false };
-      }
+      // Se calcula el DV oficial sobre la totalidad de los dígitos ingresados
+      const expectedDV = calculateDV(digits);
+      return { isValid: true, parsedBase: digits, expectedDV, hasDV: false };
     }
   }
 
@@ -144,12 +125,9 @@
   const duplicateSupplier = $derived.by(() => {
     if (!numDoc.trim()) return null;
     
-    // Obtener parte base numérica del NIT que se escribe en el input
-    const cleanedInput = numDoc.replace(/[\s.,-]/g, '');
-    if (cleanedInput.length < 5) return null; // Evitar búsquedas con inputs muy cortos
-    
-    // Extraer los primeros 9 dígitos para comparar bases limpias de NIT
-    const baseInput = cleanedInput.substring(0, 9);
+    // Obtener la parte base numérica limpia del documento
+    const inputBase = nitValidation.parsedBase || numDoc.split('-')[0].replace(/[\s.,]/g, '');
+    if (!inputBase || inputBase.length < 3) return null; // Evitar búsquedas con inputs muy cortos
     
     return suppliers.find(s => {
       // Si estamos editando, omitir el proveedor seleccionado actualmente
@@ -157,10 +135,8 @@
         return false;
       }
       
-      const cleanedSupplierDoc = s.numDoc.replace(/[\s.,-]/g, '');
-      const baseSupplier = cleanedSupplierDoc.substring(0, 9);
-      
-      return baseSupplier === baseInput;
+      const supplierBase = s.numDoc.split('-')[0].replace(/[\s.,]/g, '');
+      return supplierBase === inputBase;
     }) || null;
   });
 
@@ -447,8 +423,8 @@
 
 <!-- Slide-over Panel (Form) -->
 {#if showFormPanel}
-  <div class="form-overlay" onclick={() => showFormPanel = false}>
-    <div class="form-panel animate-slide-in-right" onclick={(e) => e.stopPropagation()}>
+  <div class="form-overlay">
+    <div class="form-panel animate-slide-in-right">
       <div class="panel-header">
         <h2>{formMode === 'create' ? 'Registrar Tercero (Proveedor)' : 'Modificar Tercero (Proveedor)'}</h2>
         <button class="close-panel" onclick={() => showFormPanel = false}>&times;</button>

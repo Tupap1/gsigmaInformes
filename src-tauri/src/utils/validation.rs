@@ -53,22 +53,14 @@ pub fn parse_nit(nit_str: &str) -> Result<(String, Option<u8>), String> {
         let dv = dv_str.chars().next().unwrap().to_digit(10).unwrap() as u8;
         Ok((base.to_string(), Some(dv)))
     } else {
-        // Sin guion
+        // Sin guion: todo el string es la base numérica (Cédula o NIT de cualquier longitud)
         let digits = parts[0];
         if digits.is_empty() || !digits.chars().all(|c| c.is_digit(10)) {
             return Err("El NIT debe contener únicamente dígitos numéricos.".to_string());
         }
 
-        // Si tiene exactamente 10 dígitos, asumimos que el último dígito es el DV
-        if digits.len() == 10 {
-            let base = &digits[0..9];
-            let dv_char = digits.chars().nth(9).unwrap();
-            let dv = dv_char.to_digit(10).unwrap() as u8;
-            Ok((base.to_string(), Some(dv)))
-        } else {
-            // Se trata como un número simple sin dígito de verificación
-            Ok((digits.to_string(), None))
-        }
+        // Se trata como un número base simple sin dígito de verificación
+        Ok((digits.to_string(), None))
     }
 }
 
@@ -113,8 +105,11 @@ mod tests {
 
     #[test]
     fn test_parse_nit_ten_digits() {
-        let parsed = parse_nit("8001972684").unwrap();
-        assert_eq!(parsed, ("800197268".to_string(), Some(4)));
+        let parsed = parse_nit("1066270400").unwrap();
+        assert_eq!(parsed, ("1066270400".to_string(), None));
+
+        let parsed_with_hyphen = parse_nit("1066270400-1").unwrap();
+        assert_eq!(parsed_with_hyphen, ("1066270400".to_string(), Some(1)));
     }
 
     #[test]
@@ -127,7 +122,8 @@ mod tests {
     fn test_validate_nit_success() {
         // Valid inputs
         assert!(validate_nit("800197268-4").is_ok());
-        assert!(validate_nit("8001972684").is_ok());
+        assert!(validate_nit("1066270400-1").is_ok());
+        assert!(validate_nit("1066270400").is_ok());
         assert!(validate_nit("800197268").is_ok());
         assert!(validate_nit("890.900.943-1").is_ok());
         assert!(validate_nit("860002964-4").is_ok());
@@ -137,7 +133,7 @@ mod tests {
     fn test_validate_nit_failure() {
         // Invalid DV
         assert!(validate_nit("800197268-8").is_err());
-        assert!(validate_nit("8001972689").is_err());
+        assert!(validate_nit("1066270400-9").is_err());
         assert!(validate_nit("890900943-5").is_err());
 
         // Invalid format
