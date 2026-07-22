@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `proveedo` (
   `PROPAGCOM` varchar(5) NOT NULL DEFAULT 'N',
   `PROFECMOD` date DEFAULT NULL,
   `respfisc` varchar(200) NOT NULL DEFAULT 'O-99,',
-  `taxescheme` varchar(50) NOT NULL DEFAULT 'ZZ,',
+  `taxscheme` varchar(50) NOT NULL DEFAULT 'ZZ,',
   PRIMARY KEY (`PROCOD`),
   KEY `idx_numdoc` (`PRONUMDOC`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

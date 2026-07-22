@@ -59,7 +59,7 @@ pub async fn perform_list_proveedores(
         TRIM(p.PROEMA) AS email,
         TRIM(p.PROCON) AS contacto,
         p.status AS status,
-        p.pais AS pais,
+        TRIM(t.TRCPAI) AS pais,
         TRIM(t.TRCNOM) AS nombre,
         TRIM(t.TRCAPE) AS apellido,
         TRIM(t.TRCTEL1) AS telefono1,
@@ -68,7 +68,7 @@ pub async fn perform_list_proveedores(
         TRIM(t.TRCCIU) AS ciudad,
         TRIM(t.TRCDEPA) AS departamento,
         p.respfisc AS resp_fisc,
-        p.taxescheme AS tax_scheme
+        p.taxscheme AS tax_scheme
       FROM pv.proveedo p
       INNER JOIN adm.trc t ON p.PROCOD = t.TRCID
       {}
@@ -94,8 +94,8 @@ pub async fn perform_list_proveedores(
                     p.PROTIPDOC AS tipo_doc,
                     TRIM(p.PROEMA) AS email,
                     TRIM(p.PROCON) AS contacto,
-                    p.status AS status,
-                    p.pais AS pais,
+                    'A' AS status,
+                    TRIM(t.TRCPAI) AS pais,
                     TRIM(t.TRCNOM) AS nombre,
                     TRIM(t.TRCAPE) AS apellido,
                     TRIM(t.TRCTEL1) AS telefono1,
@@ -137,7 +137,7 @@ pub async fn perform_get_proveedor(db: &AppDb, id: String) -> Result<Proveedor, 
         TRIM(p.PROEMA) AS email,
         TRIM(p.PROCON) AS contacto,
         p.status AS status,
-        p.pais AS pais,
+        TRIM(t.TRCPAI) AS pais,
         TRIM(t.TRCNOM) AS nombre,
         TRIM(t.TRCAPE) AS apellido,
         TRIM(t.TRCTEL1) AS telefono1,
@@ -146,7 +146,7 @@ pub async fn perform_get_proveedor(db: &AppDb, id: String) -> Result<Proveedor, 
         TRIM(t.TRCCIU) AS ciudad,
         TRIM(t.TRCDEPA) AS departamento,
         p.respfisc AS resp_fisc,
-        p.taxescheme AS tax_scheme
+        p.taxscheme AS tax_scheme
       FROM pv.proveedo p
       INNER JOIN adm.trc t ON p.PROCOD = t.TRCID
       WHERE TRIM(p.PROCOD) = ?
@@ -169,8 +169,8 @@ pub async fn perform_get_proveedor(db: &AppDb, id: String) -> Result<Proveedor, 
                     p.PROTIPDOC AS tipo_doc,
                     TRIM(p.PROEMA) AS email,
                     TRIM(p.PROCON) AS contacto,
-                    p.status AS status,
-                    p.pais AS pais,
+                    'A' AS status,
+                    TRIM(t.TRCPAI) AS pais,
                     TRIM(t.TRCNOM) AS nombre,
                     TRIM(t.TRCAPE) AS apellido,
                     TRIM(t.TRCTEL1) AS telefono1,
@@ -333,7 +333,7 @@ pub async fn perform_create_proveedor(
         trcid = format!("{}{}", prefix, seq_str);
 
         let trc_tip = "PROVEEDOR";
-        let trc_nat = if tipo_doc == "N" { "J" } else { "N" };
+        let trc_nat = "N";
 
         sqlx::query(
             r#"
@@ -369,7 +369,7 @@ pub async fn perform_create_proveedor(
     let insert_result = sqlx::query(
         r#"
         INSERT INTO pv.proveedo (
-          PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROPAGCOM, PROFECMOD, respfisc, taxescheme
+          PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROPAGCOM, PROFECMOD, respfisc, taxscheme
         ) VALUES (?, ?, ?, ?, ?, ?, 'A', 'CO', 'N', CURDATE(), ?, ?)
         "#,
     )
@@ -390,8 +390,8 @@ pub async fn perform_create_proveedor(
             let res2 = sqlx::query(
                 r#"
                 INSERT INTO pv.proveedo (
-                  PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROPAGCOM, PROFECMOD
-                ) VALUES (?, ?, ?, ?, ?, ?, 'A', 'CO', 'N', CURDATE())
+                  PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, PROPAGCOM, PROFECMOD
+                ) VALUES (?, ?, ?, ?, ?, ?, 'N', CURDATE())
                 "#,
             )
             .bind(&trcid)
@@ -409,8 +409,8 @@ pub async fn perform_create_proveedor(
                     sqlx::query(
                         r#"
                         INSERT INTO pv.proveedo (
-                          PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROFECMOD
-                        ) VALUES (?, ?, ?, ?, ?, ?, 'A', 'CO', CURDATE())
+                          PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, PROFECMOD
+                        ) VALUES (?, ?, ?, ?, ?, ?, CURDATE())
                         "#,
                     )
                     .bind(&trcid)
@@ -519,10 +519,12 @@ pub async fn perform_update_proveedor(
         format!("Error al actualizar tercero (adm.trc): {}", e)
     })?;
 
+    let status_val = input.status.as_deref().unwrap_or("A");
+
     let update_prov_res = sqlx::query(
         r#"
         UPDATE pv.proveedo SET 
-          PROCON = ?, PROEMA = ?, status = ?, PROFECMOD = CURDATE(), respfisc = ?, taxescheme = ?
+          PROCON = ?, PROEMA = ?, status = ?, PROFECMOD = CURDATE(), respfisc = ?, taxscheme = ?
         WHERE TRIM(PROCOD) = ?
         "#,
     )
@@ -538,23 +540,45 @@ pub async fn perform_update_proveedor(
     if let Err(e) = update_prov_res {
         let err_str = e.to_string();
         if err_str.contains("Unknown column") || err_str.contains("1054") {
-            sqlx::query(
+            let res2 = sqlx::query(
                 r#"
                 UPDATE pv.proveedo SET 
-                  PROCON = ?, PROEMA = ?, status = ?, PROFECMOD = CURDATE()
+                  PROCON = ?, PROEMA = ?, PROFECMOD = CURDATE(), respfisc = ?, taxscheme = ?
                 WHERE TRIM(PROCOD) = ?
                 "#,
             )
             .bind(&contacto_upper)
             .bind(&email_val)
-            .bind(status_val)
+            .bind(&resp_fisc_val)
+            .bind(&tax_scheme_val)
             .bind(trimmed_id)
             .execute(&mut *tx)
-            .await
-            .map_err(|e2| {
-                log::error!("Failed to update proveedo {}: {:?}", trimmed_id, e2);
-                format!("Error al actualizar proveedor (pv.proveedo): {}", e2)
-            })?;
+            .await;
+
+            if let Err(e2) = res2 {
+                let err_str2 = e2.to_string();
+                if err_str2.contains("Unknown column") || err_str2.contains("1054") {
+                    sqlx::query(
+                        r#"
+                        UPDATE pv.proveedo SET 
+                          PROCON = ?, PROEMA = ?, PROFECMOD = CURDATE()
+                        WHERE TRIM(PROCOD) = ?
+                        "#,
+                    )
+                    .bind(&contacto_upper)
+                    .bind(&email_val)
+                    .bind(trimmed_id)
+                    .execute(&mut *tx)
+                    .await
+                    .map_err(|e3| {
+                        log::error!("Failed to update proveedo {}: {:?}", trimmed_id, e3);
+                        format!("Error al actualizar proveedor (pv.proveedo): {}", e3)
+                    })?;
+                } else {
+                    log::error!("Failed to update proveedo {}: {:?}", trimmed_id, e2);
+                    return Err(format!("Error al actualizar proveedor (pv.proveedo): {}", e2));
+                }
+            }
         } else {
             log::error!("Failed to update proveedo {}: {:?}", trimmed_id, e);
             return Err(format!("Error al actualizar proveedor (pv.proveedo): {}", e));
@@ -640,16 +664,30 @@ pub async fn perform_delete_proveedor(db: &AppDb, id: String) -> Result<DeleteRe
     let message: String;
 
     if has_purchases {
-        sqlx::query(
+        let soft_del_res = sqlx::query(
             "UPDATE pv.proveedo SET status = 'I', PROFECMOD = CURDATE() WHERE TRIM(PROCOD) = ?",
         )
         .bind(trimmed_id)
         .execute(&mut *tx)
-        .await
-        .map_err(|e| {
-            log::error!("Failed to deactivate supplier {}: {:?}", trimmed_id, e);
-            "Ocurrió un error interno en el servidor.".to_string()
-        })?;
+        .await;
+
+        if let Err(e) = soft_del_res {
+            let err_str = e.to_string();
+            if err_str.contains("Unknown column") || err_str.contains("1054") {
+                sqlx::query(
+                    "UPDATE adm.trc SET TRCULTMOD = CURDATE() WHERE TRIM(TRCID) = ?",
+                )
+                .bind(trimmed_id)
+                .execute(&mut *tx)
+                .await
+                .map_err(|e2| {
+                    log::error!("Failed to deactivate supplier {}: {:?}", trimmed_id, e2);
+                    "Ocurrió un error interno en el servidor.".to_string()
+                })?;
+            } else {
+                return Err("Ocurrió un error interno en el servidor.".to_string());
+            }
+        }
         action = "deactivated".to_string();
         reason = "El proveedor tiene transacciones históricas de compras. Se desactivó el registro para conservar integridad.".to_string();
         message = "Proveedor desactivado (soft-delete) por historial de transacciones.".to_string();
@@ -923,6 +961,12 @@ mod tests {
             .expect("Failed to initialize pools");
 
         let prov_id = "900120000000001".to_string();
+
+        sqlx::query("UPDATE pv.proveedo SET status = 'A' WHERE TRIM(PROCOD) = ?")
+            .bind(&prov_id)
+            .execute(&db_state.write_pool)
+            .await
+            .ok();
 
         let before_del = perform_get_proveedor(&db_state, prov_id.clone())
             .await
