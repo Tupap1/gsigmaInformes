@@ -16,6 +16,17 @@ fn map_or_empty(val: &Option<String>) -> String {
         .unwrap_or_default()
 }
 
+fn sanitize_email(val: &Option<String>) -> String {
+    val.as_ref()
+        .map(|s| {
+            s.chars()
+                .filter(|c| !c.is_whitespace() && *c != '\u{00a0}')
+                .collect::<String>()
+                .to_lowercase()
+        })
+        .unwrap_or_default()
+}
+
 fn map_resp_fisc(val: &Option<String>) -> String {
     let raw = val.as_deref().unwrap_or("").trim();
     if raw.is_empty() {
@@ -265,7 +276,7 @@ pub async fn perform_create_proveedor(
     let apellido_upper = map_upper_or_empty(&input.apellido);
     let tel1 = map_or_empty(&input.telefono1);
     let tel2 = map_or_empty(&input.telefono2);
-    let email_val = map_or_empty(&input.email);
+    let email_val = sanitize_email(&input.email);
     let dir1_upper = map_upper_or_empty(&input.direccion1);
     let ciu_upper = map_upper_or_empty(&input.ciudad);
     let dep_upper = map_upper_or_empty(&input.departamento);
@@ -486,12 +497,11 @@ pub async fn perform_update_proveedor(
     let apellido_upper = map_upper_or_empty(&input.apellido);
     let tel1 = map_or_empty(&input.telefono1);
     let tel2 = map_or_empty(&input.telefono2);
-    let email_val = map_or_empty(&input.email);
+    let email_val = sanitize_email(&input.email);
     let dir1_upper = map_upper_or_empty(&input.direccion1);
     let ciu_upper = map_upper_or_empty(&input.ciudad);
     let dep_upper = map_upper_or_empty(&input.departamento);
     let contacto_upper = map_upper_or_empty(&input.contacto);
-    let status_val = input.status.as_deref().unwrap_or("A");
     let resp_fisc_val = map_resp_fisc(&input.resp_fisc);
     let tax_scheme_val = map_tax_scheme(&input.tax_scheme);
 
