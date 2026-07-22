@@ -67,7 +67,7 @@ pub async fn perform_list_proveedores(
         TRIM(p.PROCOD) AS id,
         TRIM(p.PRONUMDOC) AS num_doc,
         p.PROTIPDOC AS tipo_doc,
-        TRIM(p.PROEMA) AS email,
+        IFNULL(NULLIF(TRIM(p.PROEMA), ''), NULLIF(TRIM(t.trcema1), '')) AS email,
         TRIM(p.PROCON) AS contacto,
         p.status AS status,
         TRIM(t.TRCPAI) AS pais,
@@ -103,7 +103,7 @@ pub async fn perform_list_proveedores(
                     TRIM(p.PROCOD) AS id,
                     TRIM(p.PRONUMDOC) AS num_doc,
                     p.PROTIPDOC AS tipo_doc,
-                    TRIM(p.PROEMA) AS email,
+                    IFNULL(NULLIF(TRIM(p.PROEMA), ''), NULLIF(TRIM(t.trcema1), '')) AS email,
                     TRIM(p.PROCON) AS contacto,
                     'A' AS status,
                     TRIM(t.TRCPAI) AS pais,
@@ -145,7 +145,7 @@ pub async fn perform_get_proveedor(db: &AppDb, id: String) -> Result<Proveedor, 
         TRIM(p.PROCOD) AS id,
         TRIM(p.PRONUMDOC) AS num_doc,
         p.PROTIPDOC AS tipo_doc,
-        TRIM(p.PROEMA) AS email,
+        IFNULL(NULLIF(TRIM(p.PROEMA), ''), NULLIF(TRIM(t.trcema1), '')) AS email,
         TRIM(p.PROCON) AS contacto,
         p.status AS status,
         TRIM(t.TRCPAI) AS pais,
@@ -178,7 +178,7 @@ pub async fn perform_get_proveedor(db: &AppDb, id: String) -> Result<Proveedor, 
                     TRIM(p.PROCOD) AS id,
                     TRIM(p.PRONUMDOC) AS num_doc,
                     p.PROTIPDOC AS tipo_doc,
-                    TRIM(p.PROEMA) AS email,
+                    IFNULL(NULLIF(TRIM(p.PROEMA), ''), NULLIF(TRIM(t.trcema1), '')) AS email,
                     TRIM(p.PROCON) AS contacto,
                     'A' AS status,
                     TRIM(t.TRCPAI) AS pais,
@@ -343,7 +343,7 @@ pub async fn perform_create_proveedor(
         let seq_str = format!("{:010}", next_seq);
         trcid = format!("{}{}", prefix, seq_str);
 
-        let trc_tip = "PROVEEDOR";
+        let trc_tip = "P";
         let trc_nat = "N";
 
         sqlx::query(
@@ -715,7 +715,7 @@ pub async fn perform_delete_proveedor(db: &AppDb, id: String) -> Result<DeleteRe
                 "Ocurrió un error interno en el servidor.".to_string()
             })?;
 
-        sqlx::query("DELETE FROM adm.trc WHERE TRIM(TRCID) = ? AND TRCTIP = 'PROVEEDOR'")
+        sqlx::query("DELETE FROM adm.trc WHERE TRIM(TRCID) = ? AND TRCTIP = 'P'")
             .bind(trimmed_id)
             .execute(&mut *tx)
             .await

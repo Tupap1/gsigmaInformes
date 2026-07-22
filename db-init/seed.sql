@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `trc` (
   `TRCPAI` varchar(50) DEFAULT 'CO',
   `TRCNAT` varchar(1) NOT NULL,
   `TRCDEPA` varchar(50) DEFAULT '',
-  `TRCTIP` varchar(20) NOT NULL DEFAULT 'PROVEEDOR',
+  `TRCTIP` varchar(20) NOT NULL DEFAULT 'P',
   `TRCULTMOD` date DEFAULT NULL,
   PRIMARY KEY (`TRCID`),
   KEY `idx_numdoc` (`TRCNUMDOC`)
@@ -164,9 +164,9 @@ CREATE TABLE IF NOT EXISTS `venta25` (
 
 -- 1. Terceros en adm.trc
 INSERT INTO `adm`.`trc` (EMPID, TRCID, TRCNOM, TRCAPE, TRCTEL1, TRCTEL2, trcema1, TRCTIPDOC, TRCNUMDOC, TRCDIR1, TRCCIU, TRCPAI, TRCNAT, TRCDEPA, TRCTIP, TRCULTMOD) VALUES
-('000000000000001', '900120000000001', 'PROVEEDOR CON COMPRAS S.A.S.', '', '3001112233', '', 'compras@proveedorA.com', 'N', '900123456', 'Calle 10 # 5-20', 'Tunja', 'CO', 'J', 'Boyacá', 'PROVEEDOR', '2026-07-15'),
-('000000000000001', '900980000000002', 'PROVEEDOR SIN COMPRAS S.A.S.', '', '3004445566', '', 'sincompras@proveedorB.com', 'N', '900987654', 'Avenida Central # 12-45', 'Duitama', 'CO', 'J', 'Boyacá', 'PROVEEDOR', '2026-07-15'),
-('000000000000001', '123450000000003', 'JUAN', 'PEREZ', '3109998877', '', 'juan.perez@email.com', 'C', '12345678', 'Carrera 8 # 22-10', 'Sogamoso', 'CO', 'N', 'Boyacá', 'PROVEEDOR', '2026-07-15');
+('000000000000001', '900120000000001', 'PROVEEDOR CON COMPRAS S.A.S.', '', '3001112233', '', 'compras@proveedorA.com', 'N', '900123456', 'Calle 10 # 5-20', 'Tunja', 'CO', 'J', 'Boyacá', 'P', '2026-07-15'),
+('000000000000001', '900980000000002', 'PROVEEDOR SIN COMPRAS S.A.S.', '', '3004445566', '', 'sincompras@proveedorB.com', 'N', '900987654', 'Avenida Central # 12-45', 'Duitama', 'CO', 'J', 'Boyacá', 'P', '2026-07-15'),
+('000000000000001', '123450000000003', 'JUAN', 'PEREZ', '3109998877', '', 'juan.perez@email.com', 'C', '12345678', 'Carrera 8 # 22-10', 'Sogamoso', 'CO', 'N', 'Boyacá', 'P', '2026-07-15');
 
 -- 2. Proveedores en pv.proveedo
 INSERT INTO `pv`.`proveedo` (PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROFECMOD) VALUES
