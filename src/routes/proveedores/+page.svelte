@@ -230,6 +230,11 @@
       return;
     }
 
+    if (!email.trim()) {
+      toasts.error('El correo electrónico es requerido.');
+      return;
+    }
+
     if (tipoDoc === 'N' && !isNitValid) {
       toasts.error(nitValidation.errorMsg || 'El dígito de verificación del NIT es incorrecto.');
       return;
@@ -521,13 +526,14 @@
           </div>
 
           <div class="form-group">
-            <label for="email">Correo Electrónico</label>
+            <label for="email">Correo Electrónico *</label>
             <input 
               id="email" 
               type="email" 
               class="form-control" 
               placeholder="ejemplo@recicladora.com" 
               bind:value={email} 
+              required
             />
           </div>
 

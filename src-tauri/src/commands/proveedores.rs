@@ -111,6 +111,10 @@ pub async fn perform_create_proveedor(
     if trimmed_name.is_empty() {
         return Err("El nombre o razón social (nombre) es requerido.".to_string());
     }
+    let trimmed_email = input.email.as_deref().unwrap_or("").trim();
+    if trimmed_email.is_empty() {
+        return Err("El correo electrónico (email) es requerido.".to_string());
+    }
     let tipo_doc = "N"; // Forzar a NIT siempre en backend para nuevos registros
     crate::utils::validation::validate_nit(trimmed_doc)?;
 
@@ -296,6 +300,10 @@ pub async fn perform_update_proveedor(
     let trimmed_name = input.nombre.trim();
     if trimmed_name.is_empty() {
         return Err("El nombre o razón social (nombre) es requerido.".to_string());
+    }
+    let trimmed_email = input.email.as_deref().unwrap_or("").trim();
+    if trimmed_email.is_empty() {
+        return Err("El correo electrónico (email) es requerido.".to_string());
     }
 
     let mut tx = db.write_pool.begin().await.map_err(|e| {
@@ -649,7 +657,7 @@ mod tests {
             apellido: None,
             telefono1: None,
             telefono2: None,
-            email: None,
+            email: Some("dup@test.com".to_string()),
             contacto: None,
             direccion1: None,
             ciudad: None,
