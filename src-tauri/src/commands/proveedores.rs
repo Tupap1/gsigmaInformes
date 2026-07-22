@@ -259,11 +259,11 @@ pub async fn perform_create_proveedor(
         })?;
     }
 
-    sqlx::query(
+    let insert_result = sqlx::query(
         r#"
         INSERT INTO pv.proveedo (
-          PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROFECMOD
-        ) VALUES (?, ?, ?, ?, ?, ?, 'A', 'CO', CURDATE())
+          PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROPAGCOM, PROFECMOD
+        ) VALUES (?, ?, ?, ?, ?, ?, 'A', 'CO', 'N', CURDATE())
         "#,
     )
     .bind(&trcid)
@@ -273,11 +273,31 @@ pub async fn perform_create_proveedor(
     .bind(&email_val)
     .bind(&empid)
     .execute(&mut *tx)
-    .await
-    .map_err(|e| {
-        log::error!("Failed to insert into proveedo {}: {:?}", trcid, e);
-        format!("Error al insertar proveedor (pv.proveedo): {}", e)
-    })?;
+    .await;
+
+    if let Err(e) = insert_result {
+        let err_str = e.to_string();
+        if err_str.contains("Unknown column") || err_str.contains("1054") {
+            sqlx::query(
+                r#"
+                INSERT INTO pv.proveedo (
+                  PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROFECMOD
+                ) VALUES (?, ?, ?, ?, ?, ?, 'A', 'CO', CURDATE())
+                "#,
+            )
+            .bind(&trcid)
+            .bind(&contacto_upper)
+            .bind(trimmed_doc)
+            .bind(tipo_doc)
+            .bind(&email_val)
+            .bind(&empid)
+            .execute(&mut *tx)
+            .await
+            .map_err(|e2| format!("Error al insertar proveedor (pv.proveedo): {}", e2))?;
+        } else {
+            return Err(format!("Error al insertar proveedor (pv.proveedo): {}", e));
+        }
+    }
 
     tx.commit().await.map_err(|e| {
         log::error!("Failed to commit transaction: {:?}", e);

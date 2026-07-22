@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS `proveedo` (
   `EMPID` varchar(20) NOT NULL DEFAULT '000000000000001',
   `status` varchar(1) NOT NULL DEFAULT 'A',
   `pais` varchar(5) DEFAULT 'CO',
+  `PROPAGCOM` varchar(5) NOT NULL DEFAULT 'N',
   `PROFECMOD` date DEFAULT NULL,
   PRIMARY KEY (`PROCOD`),
   KEY `idx_numdoc` (`PRONUMDOC`)
