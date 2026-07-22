@@ -61,7 +61,12 @@
       }
     } catch (err: any) {
       console.error(err);
-      toasts.error('No se pudo comprobar actualizaciones en este entorno.');
+      const msg = String(err?.message || err || '');
+      if (import.meta.env.DEV || msg.toLowerCase().includes('dev') || msg.toLowerCase().includes('not supported')) {
+        toasts.info('La búsqueda de actualizaciones automáticas requiere la app instalada en producción (.msi).');
+      } else {
+        toasts.error(`No se pudo comprobar actualizaciones: ${msg || 'Error de conexión'}`);
+      }
     } finally {
       checkingUpdate = false;
     }
