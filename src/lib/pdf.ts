@@ -19,7 +19,7 @@ export async function generateReportPDF(
   startDate: string,
   endDate: string,
   compras: CompraAcumulada[],
-  resumen: ResumenCaja
+  resumen?: ResumenCaja | null
 ) {
   // 1. Preparar la tabla de compras acumuladas
   const tableBody: any[] = [];
@@ -57,35 +57,6 @@ export async function generateReportPDF(
     {}
   ]);
 
-  // 2. Preparar el resumen de caja
-  const resumenTableBody = [
-    [
-      { text: 'Base Caja inicial', style: 'resumenCell' },
-      { text: '(+)', style: 'resumenCellOp' },
-      { text: `$${formatCurrency(resumen.baseCaja)}`, style: 'resumenCellVal' }
-    ],
-    [
-      { text: 'Venta Contado', style: 'resumenCell' },
-      { text: '(+)', style: 'resumenCellOp' },
-      { text: `$${formatCurrency(resumen.ventasContado)}`, style: 'resumenCellVal' }
-    ],
-    [
-      { text: 'Otros Ingresos', style: 'resumenCell' },
-      { text: '(+)', style: 'resumenCellOp' },
-      { text: `$${formatCurrency(resumen.ingresos)}`, style: 'resumenCellVal' }
-    ],
-    [
-      { text: 'Venta Crédito (No afecta caja)', style: 'resumenCellMuted' },
-      { text: '(No)', style: 'resumenCellOpMuted' },
-      { text: `$${formatCurrency(resumen.ventasCredito)}`, style: 'resumenCellValMuted' }
-    ],
-    [
-      { text: 'Pagado en Compras', style: 'resumenCell' },
-      { text: '(-)', style: 'resumenCellOp' },
-      { text: `$${formatCurrency(resumen.compras)}`, style: 'resumenCellVal' }
-    ]
-  ];
-
   // Date label formatting
   const dateStr = startDate === endDate ? startDate : `${startDate} a ${endDate}`;
 
@@ -99,7 +70,7 @@ export async function generateReportPDF(
     content: [
       // Cabecera del ticket
       { text: 'RECICLADORA BOYACÁ', style: 'ticketHeader' },
-      { text: 'INFORME DE COMPRAS Y CAJA', style: 'ticketSubheader' },
+      { text: 'INFORME DE COMPRAS ACUMULADAS', style: 'ticketSubheader' },
       { text: `Período: ${dateStr}`, style: 'ticketDate' },
       
       { text: 'RESUMEN DE MATERIALES', style: 'sectionHeader' },
@@ -117,57 +88,6 @@ export async function generateReportPDF(
           vLineWidth: () => 0,
           hLineColor: () => '#e5e7eb'
         }
-      },
-
-      { text: 'BALANCE DE CAJA', style: 'sectionHeader' },
-
-      // Resumen de caja
-      {
-        style: 'resumenTable',
-        table: {
-          widths: ['*', 'auto', 'auto'],
-          body: resumenTableBody
-        },
-        layout: 'noBorders'
-      },
-
-      // Divididor
-      {
-        canvas: [
-          { type: 'line' as const, x1: 0, y1: 4, x2: 216, y2: 4, lineWidth: 1, strokeColor: '#e5e7eb' }
-        ],
-        margin: [0, 8, 0, 8] as [number, number, number, number]
-      },
-
-      // Caja Efectivo
-      {
-        style: 'balanceBoxGreen',
-        table: {
-          widths: ['*', 'auto'],
-          body: [
-            [
-              { text: 'Caja Efectivo', style: 'balanceLabel' },
-              { text: `$${formatCurrency(resumen.cajaEfectivo)}`, style: 'balanceValueGreen' }
-            ]
-          ]
-        },
-        layout: 'noBorders'
-      },
-
-      // Total en Caja
-      {
-        style: 'balanceBoxBlue',
-        table: {
-          widths: ['*', 'auto'],
-          body: [
-            [
-              { text: 'Total en Caja', style: 'balanceLabel' },
-              { text: `$${formatCurrency(resumen.cajaTotal)}`, style: 'balanceValueBlue' }
-            ]
-          ]
-        },
-        layout: 'noBorders',
-        margin: [0, 4, 0, 0] as [number, number, number, number]
       }
     ],
     
