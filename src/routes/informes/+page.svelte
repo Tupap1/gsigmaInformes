@@ -158,22 +158,12 @@
         <!-- Egresos Group -->
         <div class="financial-group" style="margin-top: 20px;">
           <h4 class="group-title-header">Egresos de Caja</h4>
-          <div class="group-grid-2">
-            <div class="caja-card destructive">
-              <div class="caja-hdr">
-                <h4>Pagado en Compras</h4>
-              </div>
-              <div class="caja-val">${resumen.compras.toLocaleString('es-CO')}</div>
-              <div class="caja-badge minus">(-) Salida</div>
+          <div class="caja-card destructive">
+            <div class="caja-hdr">
+              <h4>Pagado en Compras</h4>
             </div>
-
-            <div class="caja-card destructive">
-              <div class="caja-hdr">
-                <h4>Total Egresos</h4>
-              </div>
-              <div class="caja-val">${resumen.egresos.toLocaleString('es-CO')}</div>
-              <div class="caja-badge minus">(-) Salida</div>
-            </div>
+            <div class="caja-val">${resumen.compras.toLocaleString('es-CO')}</div>
+            <div class="caja-badge minus">(-) Salida</div>
           </div>
         </div>
       </div>
@@ -188,7 +178,7 @@
                 <h4>Caja Efectivo</h4>
               </div>
               <div class="caja-val">${resumen.cajaEfectivo.toLocaleString('es-CO')}</div>
-              <div class="caja-desc">Base + VentaContado + Ingresos - Compras - Egresos</div>
+              <div class="caja-desc">Base + Venta Contado + Ingresos - Compras</div>
             </div>
 
             <div class="caja-card highlighted-blue">

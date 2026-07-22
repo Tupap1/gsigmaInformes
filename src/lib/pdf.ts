@@ -83,11 +83,6 @@ export async function generateReportPDF(
       { text: 'Pagado en Compras', style: 'resumenCell' },
       { text: '(-)', style: 'resumenCellOp' },
       { text: `$${formatCurrency(resumen.compras)}`, style: 'resumenCellVal' }
-    ],
-    [
-      { text: 'Total Egresos', style: 'resumenCell' },
-      { text: '(-)', style: 'resumenCellOp' },
-      { text: `$${formatCurrency(resumen.egresos)}`, style: 'resumenCellVal' }
     ]
   ];
 

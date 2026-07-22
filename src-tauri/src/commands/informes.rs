@@ -125,18 +125,8 @@ pub async fn perform_get_resumen_caja(
         "Error al obtener ingresos.".to_string()
     })?;
 
-    // 3. Egresos
-    let egresos: f64 = sqlx::query_scalar(
-        "SELECT COALESCE(SUM(EGRVALOR), 0.0) FROM pv.egrcajp WHERE EGRFECHA >= ? AND EGRFECHA <= ? AND EGRESTADO != 'A'"
-    )
-    .bind(&fecha_inicio)
-    .bind(&fecha_fin)
-    .fetch_one(&db.read_pool)
-    .await
-    .map_err(|e| {
-        log::error!("Error fetching egresos: {:?}", e);
-        "Error al obtener egresos.".to_string()
-    })?;
+    // 3. Egresos (Desactivado a solicitud de la recicladora; control independiente)
+    let egresos: f64 = 0.0;
 
     // 4. Ventas (Contado & Crédito)
     let venta_tables = get_year_tables("venta", &fecha_inicio, &fecha_fin)?;
