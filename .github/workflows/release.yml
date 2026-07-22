@@ -30,7 +30,7 @@ jobs:
           workspaces: "./src-tauri -> target"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build and Release Tauri App
         uses: tauri-apps/tauri-action@v0
