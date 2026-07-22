@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS `proveedo` (
   `status` varchar(1) NOT NULL DEFAULT 'A',
   `pais` varchar(5) DEFAULT 'CO',
   `PROPAGCOM` varchar(5) NOT NULL DEFAULT 'N',
+  `PROPLAENT` double NOT NULL DEFAULT '0',
   `PROFECMOD` date DEFAULT NULL,
   `respfisc` varchar(200) NOT NULL DEFAULT 'O-99,',
   `taxscheme` varchar(50) NOT NULL DEFAULT 'ZZ,',

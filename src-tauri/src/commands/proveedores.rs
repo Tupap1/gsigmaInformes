@@ -380,8 +380,8 @@ pub async fn perform_create_proveedor(
     let insert_result = sqlx::query(
         r#"
         INSERT INTO pv.proveedo (
-          PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROPAGCOM, PROFECMOD, respfisc, taxscheme
-        ) VALUES (?, ?, ?, ?, ?, ?, 'A', 'CO', 'N', CURDATE(), ?, ?)
+          PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROPAGCOM, PROFECMOD, PROPLAENT, respfisc, taxscheme
+        ) VALUES (?, ?, ?, ?, ?, ?, 'A', 'CO', 'N', CURDATE(), 1, ?, ?)
         "#,
     )
     .bind(&trcid)
@@ -401,8 +401,8 @@ pub async fn perform_create_proveedor(
             let res2 = sqlx::query(
                 r#"
                 INSERT INTO pv.proveedo (
-                  PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, PROPAGCOM, PROFECMOD
-                ) VALUES (?, ?, ?, ?, ?, ?, 'N', CURDATE())
+                  PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, PROPAGCOM, PROFECMOD, PROPLAENT
+                ) VALUES (?, ?, ?, ?, ?, ?, 'N', CURDATE(), 1)
                 "#,
             )
             .bind(&trcid)
@@ -420,8 +420,8 @@ pub async fn perform_create_proveedor(
                     sqlx::query(
                         r#"
                         INSERT INTO pv.proveedo (
-                          PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, PROFECMOD
-                        ) VALUES (?, ?, ?, ?, ?, ?, CURDATE())
+                          PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, PROFECMOD, PROPLAENT
+                        ) VALUES (?, ?, ?, ?, ?, ?, CURDATE(), 1)
                         "#,
                     )
                     .bind(&trcid)
