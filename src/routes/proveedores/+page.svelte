@@ -511,19 +511,18 @@
             type="button" 
             class="toggle-advanced-btn" 
             onclick={() => showAdvancedFields = !showAdvancedFields}
-            style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0.75rem 1rem; background: var(--bg-tertiary, #1e293b); border: 1px solid var(--border-color, rgba(255,255,255,0.1)); border-radius: 0.5rem; color: var(--text-primary, #f8fafc); font-weight: 600; cursor: pointer; transition: all 0.2s;"
           >
-            <span style="display: flex; align-items: center; gap: 0.5rem;">
-              <span>{showAdvancedFields ? '▲' : '▼'}</span>
+            <span class="toggle-title">
+              <span class="toggle-icon">{showAdvancedFields ? '▲' : '▼'}</span>
               <span>Datos Adicionales del Tercero (Opcional)</span>
             </span>
-            <span style="font-size: 0.8rem; color: var(--text-secondary, #94a3b8);">
+            <span class="toggle-hint">
               {showAdvancedFields ? 'Ocultar campos' : 'Desplegar campos opcionales'}
             </span>
           </button>
 
           {#if showAdvancedFields}
-            <div class="advanced-fields-panel" style="margin-top: 0.75rem; padding: 1rem; background: rgba(0,0,0,0.15); border: 1px dashed rgba(255,255,255,0.15); border-radius: 0.5rem; display: flex; flex-direction: column; gap: 1rem;">
+            <div class="advanced-fields-panel">
               
               <div class="form-group">
                 <label for="apellido">Primer/Segundo Apellido (Persona Natural)</label>
@@ -1125,5 +1124,57 @@
     flex-direction: column;
     gap: 4px;
     color: var(--text-secondary);
+  }
+
+  /* Optional Fields Accordion Button & Panel (High Contrast in Light & Dark Mode) */
+  .toggle-advanced-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.85rem 1.15rem;
+    background: var(--bg-card-hover, #f3f4f6);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 0.5rem;
+    color: var(--text-primary, #111827);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .toggle-advanced-btn:hover {
+    border-color: var(--accent-green, #10b981);
+    background: var(--accent-green-light, rgba(16, 185, 129, 0.08));
+    color: var(--accent-green, #10b981);
+  }
+
+  .toggle-advanced-btn .toggle-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: inherit;
+  }
+
+  .toggle-advanced-btn .toggle-icon {
+    font-size: 0.85rem;
+    color: var(--accent-green, #10b981);
+  }
+
+  .toggle-advanced-btn .toggle-hint {
+    font-size: 0.825rem;
+    color: var(--text-secondary, #4b5563);
+    font-weight: 500;
+  }
+
+  .advanced-fields-panel {
+    margin-top: 0.85rem;
+    padding: 1.15rem;
+    background: var(--bg-card-hover, #f9fafb);
+    border: 1px dashed var(--border-color, #e5e7eb);
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
   }
 </style>
