@@ -66,7 +66,7 @@ export async function generateReportPDF(
       width: 240, // 80mm roll printer size
       height: 'auto' as any
     },
-    pageMargins: [12, 16, 12, 16] as [number, number, number, number],
+    pageMargins: [6, 12, 6, 12] as [number, number, number, number],
     content: [
       // Cabecera del ticket
       { text: 'RECICLADORA BOYACÁ', style: 'ticketHeader' },
@@ -80,13 +80,17 @@ export async function generateReportPDF(
         style: 'comprasTable',
         table: {
           headerRows: 1,
-          widths: [20, '*', 46, 52, 34],
+          widths: [18, '*', 42, 54, 44],
           body: tableBody
         },
         layout: {
           hLineWidth: (i: number, node: any) => (i === 0 || i === 1 || i === node.table.body.length) ? 1 : 0.5,
           vLineWidth: () => 0,
-          hLineColor: () => '#e5e7eb'
+          hLineColor: () => '#e5e7eb',
+          paddingLeft: () => 2,
+          paddingRight: () => 2,
+          paddingTop: () => 3,
+          paddingBottom: () => 3
         }
       }
     ],
