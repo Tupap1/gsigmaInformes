@@ -308,11 +308,11 @@ pub async fn perform_create_proveedor(
     if let Err(e) = insert_result {
         let err_str = e.to_string();
         if err_str.contains("Unknown column") || err_str.contains("1054") {
-            sqlx::query(
+            let res2 = sqlx::query(
                 r#"
                 INSERT INTO pv.proveedo (
-                  PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROFECMOD
-                ) VALUES (?, ?, ?, ?, ?, ?, 'A', 'CO', CURDATE())
+                  PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROPAGCOM, PROFECMOD
+                ) VALUES (?, ?, ?, ?, ?, ?, 'A', 'CO', 'N', CURDATE())
                 "#,
             )
             .bind(&trcid)
@@ -322,8 +322,31 @@ pub async fn perform_create_proveedor(
             .bind(&email_val)
             .bind(&empid)
             .execute(&mut *tx)
-            .await
-            .map_err(|e2| format!("Error al insertar proveedor (pv.proveedo): {}", e2))?;
+            .await;
+
+            if let Err(e2) = res2 {
+                let err_str2 = e2.to_string();
+                if err_str2.contains("Unknown column") || err_str2.contains("1054") {
+                    sqlx::query(
+                        r#"
+                        INSERT INTO pv.proveedo (
+                          PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROFECMOD
+                        ) VALUES (?, ?, ?, ?, ?, ?, 'A', 'CO', CURDATE())
+                        "#,
+                    )
+                    .bind(&trcid)
+                    .bind(&contacto_upper)
+                    .bind(trimmed_doc)
+                    .bind(tipo_doc)
+                    .bind(&email_val)
+                    .bind(&empid)
+                    .execute(&mut *tx)
+                    .await
+                    .map_err(|e3| format!("Error al insertar proveedor (pv.proveedo): {}", e3))?;
+                } else {
+                    return Err(format!("Error al insertar proveedor (pv.proveedo): {}", e2));
+                }
+            }
         } else {
             return Err(format!("Error al insertar proveedor (pv.proveedo): {}", e));
         }
