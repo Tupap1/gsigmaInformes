@@ -1,6 +1,6 @@
 {
   "name": "informes-recicladora",
-  "version": "1.0.0",
+  "version": "0.3.0",
   "type": "module",
   "description": "Aplicativo de Informes y Gestión de Proveedores - Recicladora Boyacá",
   "main": "server/index.js",
