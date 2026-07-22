@@ -233,7 +233,7 @@
             </tbody>
             <tfoot>
               <tr class="table-total-row">
-                <td colspan="2" class="bold" style="font-size: 15px; font-weight: 700; color: var(--text-primary);">TOTAL MATERIA COMPRADA</td>
+                <td colspan="2" class="bold" style="font-size: 15px; font-weight: 700; color: var(--text-primary);">TOTALES</td>
                 <td class="num-col bold" style="font-size: 15px;">{totalCantidad.toLocaleString('es-CO', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
                 <td class="num-col"></td>
                 <td class="num-col total-val bold" style="font-size: 17px;">${totalMateriales.toLocaleString('es-CO', {maximumFractionDigits:0})}</td>
