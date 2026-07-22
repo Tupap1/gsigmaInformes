@@ -109,7 +109,7 @@ export async function generateReportPDF(
         style: 'comprasTable',
         table: {
           headerRows: 1,
-          widths: [22, '*', 38, 48, 38],
+          widths: [20, '*', 46, 52, 34],
           body: tableBody
         },
         layout: {
@@ -203,30 +203,30 @@ export async function generateReportPDF(
         margin: [0, 2, 0, 8]
       },
       tableHeader: {
-        fontSize: 8.5,
+        fontSize: 7.5,
         bold: true,
         color: '#374151',
         margin: [0, 2, 0, 2]
       },
       tableHeaderRight: {
-        fontSize: 8.5,
+        fontSize: 7.5,
         bold: true,
         color: '#374151',
         alignment: 'right',
         margin: [0, 2, 0, 2]
       },
       tableCell: {
-        fontSize: 8.5,
+        fontSize: 8,
         color: '#111827',
         margin: [0, 3, 0, 3]
       },
       tableCellCode: {
-        fontSize: 8.5,
+        fontSize: 8,
         color: '#4b5563',
         margin: [0, 3, 0, 3]
       },
       tableCellRight: {
-        fontSize: 8.5,
+        fontSize: 8,
         color: '#111827',
         alignment: 'right',
         margin: [0, 3, 0, 3]
