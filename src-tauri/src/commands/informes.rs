@@ -167,36 +167,9 @@ pub async fn perform_get_resumen_caja(
         (contado, credito)
     };
 
-    // 5. Compras
-    let compra_tables = get_year_tables("compra", &fecha_inicio, &fecha_fin)?;
-    let compras = if compra_tables.is_empty() {
-        0.0
-    } else {
-        let mut union_parts = Vec::new();
-        for t in &compra_tables {
-            union_parts.push(format!(
-                "SELECT COALESCE(SUM(COMTOT), 0.0) AS total_compras FROM pv.{} WHERE COMFEC >= ? AND COMFEC <= ? AND COMEST = 'C'",
-                t
-            ));
-        }
-        let union_sql = union_parts.join(" UNION ALL ");
-        let query_sql = format!(
-            "SELECT COALESCE(SUM(total_compras), 0.0) AS total FROM ({}) AS u",
-            union_sql
-        );
-
-        let mut q = query(&query_sql);
-        for _ in 0..compra_tables.len() {
-            q = q.bind(&fecha_inicio).bind(&fecha_fin);
-        }
-
-        let row = q.fetch_one(&db.read_pool).await.map_err(|e| {
-            log::error!("Error executing purchases summary: {:?}", e);
-            "Error al calcular resumen de compras.".to_string()
-        })?;
-
-        row.try_get::<f64, _>("total").unwrap_or(0.0)
-    };
+    // 5. Compras (Suma exacta del informe de compras acumuladas por material)
+    let compras_list = perform_get_compras_acumuladas(db, fecha_inicio.clone(), fecha_fin.clone()).await?;
+    let compras: f64 = compras_list.iter().map(|item| item.total).sum();
 
     // Formulas
     let caja_efectivo = base_caja + ingresos + ventas_contado - compras - egresos;

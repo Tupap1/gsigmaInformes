@@ -174,72 +174,71 @@ export async function generateReportPDF(
     // Estilos del Reporte
     styles: {
       ticketHeader: {
-        fontSize: 12,
+        fontSize: 14,
         bold: true,
         alignment: 'center',
         color: '#111827',
         margin: [0, 0, 0, 2]
       },
       ticketSubheader: {
-        fontSize: 9,
+        fontSize: 10,
         bold: true,
         alignment: 'center',
         color: '#4b5563',
         margin: [0, 0, 0, 2]
       },
       ticketDate: {
-        fontSize: 8,
+        fontSize: 9,
         alignment: 'center',
-        color: '#9ca3af',
+        color: '#6b7280',
         margin: [0, 0, 0, 12]
       },
       sectionHeader: {
-        fontSize: 8,
+        fontSize: 9.5,
         bold: true,
-        color: '#4b5563',
-        margin: [0, 8, 0, 4],
-        borderBottomWidth: 1
+        color: '#374151',
+        margin: [0, 8, 0, 4]
       },
       comprasTable: {
         margin: [0, 2, 0, 8]
       },
       tableHeader: {
-        fontSize: 7,
+        fontSize: 8.5,
         bold: true,
-        color: '#4b5563',
+        color: '#374151',
         margin: [0, 2, 0, 2]
       },
       tableHeaderRight: {
-        fontSize: 7,
+        fontSize: 8.5,
         bold: true,
-        color: '#4b5563',
+        color: '#374151',
         alignment: 'right',
         margin: [0, 2, 0, 2]
       },
       tableCell: {
-        fontSize: 7,
+        fontSize: 8.5,
         color: '#111827',
         margin: [0, 3, 0, 3]
       },
       tableCellCode: {
-        fontSize: 7,
-        color: '#6b7280',
+        fontSize: 8.5,
+        color: '#4b5563',
         margin: [0, 3, 0, 3]
       },
       tableCellRight: {
-        fontSize: 7,
+        fontSize: 8.5,
         color: '#111827',
         alignment: 'right',
         margin: [0, 3, 0, 3]
       },
       tableTotalCell: {
-        fontSize: 7,
+        fontSize: 9,
         bold: true,
         color: '#111827',
         margin: [0, 4, 0, 4]
       },
       tableTotalCellRight: {
-        fontSize: 7,
+        fontSize: 9,
         bold: true,
         color: '#111827',
         alignment: 'right',
@@ -249,36 +248,36 @@ export async function generateReportPDF(
         margin: [0, 2, 0, 4]
       },
       resumenCell: {
-        fontSize: 8,
-        color: '#4b5563',
+        fontSize: 9,
+        color: '#374151',
         margin: [0, 2, 0, 2]
       },
       resumenCellMuted: {
-        fontSize: 8,
+        fontSize: 9,
         color: '#9ca3af',
         margin: [0, 2, 0, 2]
       },
       resumenCellOp: {
-        fontSize: 8,
-        color: '#9ca3af',
+        fontSize: 9,
+        color: '#6b7280',
         alignment: 'center',
         margin: [0, 2, 0, 2]
       },
       resumenCellOpMuted: {
-        fontSize: 8,
+        fontSize: 9,
         color: '#d1d5db',
         alignment: 'center',
         margin: [0, 2, 0, 2]
       },
       resumenCellVal: {
-        fontSize: 8,
+        fontSize: 9,
         bold: true,
         color: '#111827',
         alignment: 'right',
         margin: [0, 2, 0, 2]
       },
       resumenCellValMuted: {
-        fontSize: 8,
+        fontSize: 9,
         color: '#9ca3af',
         alignment: 'right',
         margin: [0, 2, 0, 2]
@@ -292,18 +291,18 @@ export async function generateReportPDF(
         padding: [8, 6, 8, 6]
       },
       balanceLabel: {
-        fontSize: 9,
+        fontSize: 10.5,
         bold: true,
         color: '#1f2937'
       },
       balanceValueGreen: {
-        fontSize: 10,
+        fontSize: 12,
         bold: true,
         color: '#059669',
         alignment: 'right'
       },
       balanceValueBlue: {
-        fontSize: 10,
+        fontSize: 12,
         bold: true,
         color: '#2563eb',
         alignment: 'right'

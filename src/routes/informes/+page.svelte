@@ -20,6 +20,10 @@
   let resumen = $state<ResumenCaja | null>(null);
   let productos = $state<Producto[]>([]);
 
+  // Derived Totals
+  const totalCantidad = $derived(compras.reduce((sum, item) => sum + item.cantidad, 0));
+  const totalMateriales = $derived(compras.reduce((sum, item) => sum + item.total, 0));
+
   // Load products list on mount for catalogue preview
   async function loadCatalog() {
     try {
@@ -227,6 +231,14 @@
                 </tr>
               {/each}
             </tbody>
+            <tfoot>
+              <tr class="table-total-row">
+                <td colspan="2" class="bold" style="font-size: 15px; font-weight: 700; color: var(--text-primary);">TOTAL MATERIA COMPRADA</td>
+                <td class="num-col bold" style="font-size: 15px;">{totalCantidad.toLocaleString('es-CO', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                <td class="num-col"></td>
+                <td class="num-col total-val bold" style="font-size: 17px;">${totalMateriales.toLocaleString('es-CO', {maximumFractionDigits:0})}</td>
+              </tr>
+            </tfoot>
           </table>
         {/if}
       </div>
@@ -329,7 +341,7 @@
   }
 
   .group-title-header {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -390,13 +402,13 @@
   }
 
   .caja-hdr h4 {
-    font-size: 12px;
+    font-size: 14px;
     color: var(--text-secondary);
     font-weight: 600;
   }
 
   .caja-val {
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: -0.02em;
@@ -510,21 +522,21 @@
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    font-size: 13.5px;
+    font-size: 15px;
   }
 
   .report-table th {
-    padding: 12px 16px;
-    font-weight: 600;
+    padding: 14px 18px;
+    font-weight: 700;
     color: var(--text-muted);
-    font-size: 11px;
+    font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     border-bottom: 1px solid var(--border-color);
   }
 
   .report-table td {
-    padding: 14px 16px;
+    padding: 16px 18px;
     border-bottom: 1px solid var(--border-color);
   }
 
