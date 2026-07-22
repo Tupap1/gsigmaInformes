@@ -44,7 +44,13 @@ pub async fn perform_list_proveedores(
     include_inactive: Option<bool>,
 ) -> Result<Vec<Proveedor>, String> {
     let include_inactive = include_inactive.unwrap_or(false);
-    let mut query = String::from(
+    let where_clause = if include_inactive {
+        ""
+    } else {
+        "WHERE p.status = 'A'"
+    };
+
+    let query_primary = format!(
         r#"
       SELECT 
         TRIM(p.PROCOD) AS id,
@@ -61,33 +67,69 @@ pub async fn perform_list_proveedores(
         TRIM(t.TRCDIR1) AS direccion1,
         TRIM(t.TRCCIU) AS ciudad,
         TRIM(t.TRCDEPA) AS departamento,
-        NULL AS resp_fisc,
-        NULL AS tax_scheme
+        p.respfisc AS resp_fisc,
+        p.taxescheme AS tax_scheme
       FROM pv.proveedo p
       INNER JOIN adm.trc t ON p.PROCOD = t.TRCID
+      {}
+      ORDER BY t.TRCNOM ASC
     "#,
+        where_clause
     );
 
-    if !include_inactive {
-        query.push_str(" WHERE p.status = 'A'");
-    }
-
-    query.push_str(" ORDER BY t.TRCNOM ASC");
-
-    let result = sqlx::query_as::<_, Proveedor>(&query)
+    let res = sqlx::query_as::<_, Proveedor>(&query_primary)
         .fetch_all(&db.read_pool)
-        .await
-        .map_err(|e| {
-            log::error!("Error listing suppliers: {:?}", e);
-            "Ocurrió un error interno en el servidor.".to_string()
-        })?;
+        .await;
 
-    Ok(result)
+    match res {
+        Ok(list) => Ok(list),
+        Err(e) => {
+            let err_str = e.to_string();
+            if err_str.contains("Unknown column") || err_str.contains("1054") {
+                let query_fallback = format!(
+                    r#"
+                  SELECT 
+                    TRIM(p.PROCOD) AS id,
+                    TRIM(p.PRONUMDOC) AS num_doc,
+                    p.PROTIPDOC AS tipo_doc,
+                    TRIM(p.PROEMA) AS email,
+                    TRIM(p.PROCON) AS contacto,
+                    p.status AS status,
+                    p.pais AS pais,
+                    TRIM(t.TRCNOM) AS nombre,
+                    TRIM(t.TRCAPE) AS apellido,
+                    TRIM(t.TRCTEL1) AS telefono1,
+                    TRIM(t.TRCTEL2) AS telefono2,
+                    TRIM(t.TRCDIR1) AS direccion1,
+                    TRIM(t.TRCCIU) AS ciudad,
+                    TRIM(t.TRCDEPA) AS departamento,
+                    NULL AS resp_fisc,
+                    NULL AS tax_scheme
+                  FROM pv.proveedo p
+                  INNER JOIN adm.trc t ON p.PROCOD = t.TRCID
+                  {}
+                  ORDER BY t.TRCNOM ASC
+                "#,
+                    where_clause
+                );
+                sqlx::query_as::<_, Proveedor>(&query_fallback)
+                    .fetch_all(&db.read_pool)
+                    .await
+                    .map_err(|e2| {
+                        log::error!("Error listing suppliers: {:?}", e2);
+                        "Ocurrió un error interno en el servidor.".to_string()
+                    })
+            } else {
+                log::error!("Error listing suppliers: {:?}", e);
+                Err("Ocurrió un error interno en el servidor.".to_string())
+            }
+        }
+    }
 }
 
 pub async fn perform_get_proveedor(db: &AppDb, id: String) -> Result<Proveedor, String> {
     let trimmed_id = id.trim();
-    let query = r#"
+    let query_primary = r#"
       SELECT 
         TRIM(p.PROCOD) AS id,
         TRIM(p.PRONUMDOC) AS num_doc,
@@ -103,21 +145,59 @@ pub async fn perform_get_proveedor(db: &AppDb, id: String) -> Result<Proveedor, 
         TRIM(t.TRCDIR1) AS direccion1,
         TRIM(t.TRCCIU) AS ciudad,
         TRIM(t.TRCDEPA) AS departamento,
-        NULL AS resp_fisc,
-        NULL AS tax_scheme
+        p.respfisc AS resp_fisc,
+        p.taxescheme AS tax_scheme
       FROM pv.proveedo p
       INNER JOIN adm.trc t ON p.PROCOD = t.TRCID
       WHERE TRIM(p.PROCOD) = ?
     "#;
 
-    let result = sqlx::query_as::<_, Proveedor>(query)
+    let res = sqlx::query_as::<_, Proveedor>(query_primary)
         .bind(trimmed_id)
         .fetch_optional(&db.read_pool)
-        .await
-        .map_err(|e| {
-            log::error!("Error getting supplier {}: {:?}", trimmed_id, e);
-            "Ocurrió un error interno en el servidor.".to_string()
-        })?;
+        .await;
+
+    let result = match res {
+        Ok(prov_opt) => prov_opt,
+        Err(e) => {
+            let err_str = e.to_string();
+            if err_str.contains("Unknown column") || err_str.contains("1054") {
+                let query_fallback = r#"
+                  SELECT 
+                    TRIM(p.PROCOD) AS id,
+                    TRIM(p.PRONUMDOC) AS num_doc,
+                    p.PROTIPDOC AS tipo_doc,
+                    TRIM(p.PROEMA) AS email,
+                    TRIM(p.PROCON) AS contacto,
+                    p.status AS status,
+                    p.pais AS pais,
+                    TRIM(t.TRCNOM) AS nombre,
+                    TRIM(t.TRCAPE) AS apellido,
+                    TRIM(t.TRCTEL1) AS telefono1,
+                    TRIM(t.TRCTEL2) AS telefono2,
+                    TRIM(t.TRCDIR1) AS direccion1,
+                    TRIM(t.TRCCIU) AS ciudad,
+                    TRIM(t.TRCDEPA) AS departamento,
+                    NULL AS resp_fisc,
+                    NULL AS tax_scheme
+                  FROM pv.proveedo p
+                  INNER JOIN adm.trc t ON p.PROCOD = t.TRCID
+                  WHERE TRIM(p.PROCOD) = ?
+                "#;
+                sqlx::query_as::<_, Proveedor>(query_fallback)
+                    .bind(trimmed_id)
+                    .fetch_optional(&db.read_pool)
+                    .await
+                    .map_err(|e2| {
+                        log::error!("Error getting supplier {}: {:?}", trimmed_id, e2);
+                        "Ocurrió un error interno en el servidor.".to_string()
+                    })?
+            } else {
+                log::error!("Error getting supplier {}: {:?}", trimmed_id, e);
+                return Err("Ocurrió un error interno en el servidor.".to_string());
+            }
+        }
+    };
 
     match result {
         Some(prov) => Ok(prov),
@@ -143,7 +223,6 @@ pub async fn perform_create_proveedor(
     }
     let tipo_doc = "N"; // Forzar a NIT siempre en backend para nuevos registros
     crate::utils::validation::validate_nit(trimmed_doc)?;
-
 
     let empid = std::env::var("DB_EMPID").unwrap_or_else(|_| "000000000000001".to_string());
 
@@ -403,7 +482,6 @@ pub async fn perform_update_proveedor(
         crate::utils::validation::validate_nit(num_doc.trim())?;
     }
 
-
     let nombre_upper = trimmed_name.to_uppercase();
     let apellido_upper = map_upper_or_empty(&input.apellido);
     let tel1 = map_or_empty(&input.telefono1);
@@ -414,6 +492,8 @@ pub async fn perform_update_proveedor(
     let dep_upper = map_upper_or_empty(&input.departamento);
     let contacto_upper = map_upper_or_empty(&input.contacto);
     let status_val = input.status.as_deref().unwrap_or("A");
+    let resp_fisc_val = map_resp_fisc(&input.resp_fisc);
+    let tax_scheme_val = map_tax_scheme(&input.tax_scheme);
 
     sqlx::query(
         r#"
@@ -439,23 +519,47 @@ pub async fn perform_update_proveedor(
         format!("Error al actualizar tercero (adm.trc): {}", e)
     })?;
 
-    sqlx::query(
+    let update_prov_res = sqlx::query(
         r#"
         UPDATE pv.proveedo SET 
-          PROCON = ?, PROEMA = ?, status = ?, PROFECMOD = CURDATE()
+          PROCON = ?, PROEMA = ?, status = ?, PROFECMOD = CURDATE(), respfisc = ?, taxescheme = ?
         WHERE TRIM(PROCOD) = ?
         "#,
     )
     .bind(&contacto_upper)
     .bind(&email_val)
     .bind(status_val)
+    .bind(&resp_fisc_val)
+    .bind(&tax_scheme_val)
     .bind(trimmed_id)
     .execute(&mut *tx)
-    .await
-    .map_err(|e| {
-        log::error!("Failed to update proveedo {}: {:?}", trimmed_id, e);
-        format!("Error al actualizar proveedor (pv.proveedo): {}", e)
-    })?;
+    .await;
+
+    if let Err(e) = update_prov_res {
+        let err_str = e.to_string();
+        if err_str.contains("Unknown column") || err_str.contains("1054") {
+            sqlx::query(
+                r#"
+                UPDATE pv.proveedo SET 
+                  PROCON = ?, PROEMA = ?, status = ?, PROFECMOD = CURDATE()
+                WHERE TRIM(PROCOD) = ?
+                "#,
+            )
+            .bind(&contacto_upper)
+            .bind(&email_val)
+            .bind(status_val)
+            .bind(trimmed_id)
+            .execute(&mut *tx)
+            .await
+            .map_err(|e2| {
+                log::error!("Failed to update proveedo {}: {:?}", trimmed_id, e2);
+                format!("Error al actualizar proveedor (pv.proveedo): {}", e2)
+            })?;
+        } else {
+            log::error!("Failed to update proveedo {}: {:?}", trimmed_id, e);
+            return Err(format!("Error al actualizar proveedor (pv.proveedo): {}", e));
+        }
+    }
 
     tx.commit().await.map_err(|e| {
         log::error!("Failed to commit transaction: {:?}", e);
@@ -639,6 +743,25 @@ mod tests {
     use super::*;
     use crate::db;
 
+    #[test]
+    fn test_map_resp_fisc_and_tax_scheme_formatting() {
+        assert_eq!(map_resp_fisc(&None), "O-99,");
+        assert_eq!(map_resp_fisc(&Some("".to_string())), "O-99,");
+        assert_eq!(map_resp_fisc(&Some("   ".to_string())), "O-99,");
+        assert_eq!(map_resp_fisc(&Some("O-99".to_string())), "O-99,");
+        assert_eq!(map_resp_fisc(&Some("O-99,".to_string())), "O-99,");
+        assert_eq!(map_resp_fisc(&Some("O-48,O-13".to_string())), "O-48,O-13,");
+        assert_eq!(map_resp_fisc(&Some("O-48,O-13,".to_string())), "O-48,O-13,");
+
+        assert_eq!(map_tax_scheme(&None), "ZZ,");
+        assert_eq!(map_tax_scheme(&Some("".to_string())), "ZZ,");
+        assert_eq!(map_tax_scheme(&Some("   ".to_string())), "ZZ,");
+        assert_eq!(map_tax_scheme(&Some("ZZ".to_string())), "ZZ,");
+        assert_eq!(map_tax_scheme(&Some("ZZ,".to_string())), "ZZ,");
+        assert_eq!(map_tax_scheme(&Some("01".to_string())), "01,");
+        assert_eq!(map_tax_scheme(&Some("01,".to_string())), "01,");
+    }
+
     #[tokio::test]
     async fn test_list_and_get_proveedores() {
         let db_state = db::create_pools()
@@ -740,7 +863,7 @@ mod tests {
             "Ya existe un proveedor con este número de documento."
         );
 
-        // 4. Update fields
+        // 4. Update fields including resp_fisc and tax_scheme
         let update_input = UpdateProveedorInput {
             nombre: "PROVEEDOR TEST MODIFICADO".to_string(),
             apellido: Some("S.A.".to_string()),
@@ -752,8 +875,8 @@ mod tests {
             ciudad: Some("Duitama".to_string()),
             departamento: Some("Boyacá".to_string()),
             status: Some("A".to_string()),
-            resp_fisc: None,
-            tax_scheme: None,
+            resp_fisc: Some("O-48".to_string()),
+            tax_scheme: Some("01".to_string()),
         };
         perform_update_proveedor(&db_state, created_id.clone(), update_input)
             .await

@@ -240,9 +240,16 @@
     ciudad = supplier.ciudad || '';
     departamento = supplier.departamento || '';
     status = supplier.status;
-    respFisc = supplier.respFisc || 'O-99,';
-    taxScheme = supplier.taxScheme || 'ZZ,';
-    selectedResponsabilidades = (supplier.respFisc || 'O-99,')
+
+    let rawResp = supplier.respFisc?.trim() || 'O-99,';
+    if (!rawResp.endsWith(',')) rawResp += ',';
+    respFisc = rawResp;
+
+    let rawTax = supplier.taxScheme?.trim() || 'ZZ,';
+    if (!rawTax.endsWith(',')) rawTax += ',';
+    taxScheme = rawTax;
+
+    selectedResponsabilidades = rawResp
       .split(',')
       .map(s => s.trim())
       .filter(Boolean);
@@ -291,6 +298,12 @@
       }
     }
 
+    let finalRespFisc = respFisc.trim() || 'O-99,';
+    if (!finalRespFisc.endsWith(',')) finalRespFisc += ',';
+
+    let finalTaxScheme = taxScheme.trim() || 'ZZ,';
+    if (!finalTaxScheme.endsWith(',')) finalTaxScheme += ',';
+
     saving = true;
     try {
       if (formMode === 'create') {
@@ -306,8 +319,8 @@
           direccion1: direccion1.trim() || null,
           ciudad: ciudad.trim() || null,
           departamento: departamento.trim() || null,
-          respFisc: respFisc || 'O-99,',
-          taxScheme: taxScheme || 'ZZ,'
+          respFisc: finalRespFisc,
+          taxScheme: finalTaxScheme
         };
         const newId = await api.createProveedor(input);
         toasts.success(`Tercero creado con éxito. Código: ${newId}`);
@@ -323,8 +336,8 @@
           ciudad: ciudad.trim() || null,
           departamento: departamento.trim() || null,
           status: status,
-          respFisc: respFisc || 'O-99,',
-          taxScheme: taxScheme || 'ZZ,'
+          respFisc: finalRespFisc,
+          taxScheme: finalTaxScheme
         };
         await api.updateProveedor(selectedSupplier.id, input);
         toasts.success(`Tercero actualizado con éxito.`);
