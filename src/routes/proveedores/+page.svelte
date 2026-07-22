@@ -18,6 +18,7 @@
   let supplierToDelete = $state<Proveedor | null>(null);
   let saving = $state(false);
   let deleting = $state(false);
+  let showAdvancedFields = $state(false);
 
   // Form Inputs
   let numDoc = $state('');
@@ -192,6 +193,7 @@
     departamento = '';
     status = 'A';
 
+    showAdvancedFields = false;
     showFormPanel = true;
   }
 
@@ -214,6 +216,7 @@
     departamento = supplier.departamento || '';
     status = supplier.status;
 
+    showAdvancedFields = false;
     showFormPanel = true;
   }
 
@@ -437,8 +440,9 @@
 
       <form onsubmit={handleSubmit} class="panel-body">
         <div class="form-section">
-          <h3>Datos Básicos</h3>
+          <h3>Datos Básicos Obligatorios</h3>
           
+          <!-- 1. NIT (Mandatory) -->
           <div class="form-group">
             <label for="numDoc">Número de Identificación (NIT) *</label>
             <div style="display: flex; gap: 0.5rem; width: 100%;">
@@ -474,6 +478,7 @@
             {/if}
           </div>
 
+          <!-- 2. Nombre / Razón Social (Mandatory) -->
           <div class="form-group">
             <label for="nombre">Nombre o Razón Social *</label>
             <input 
@@ -486,45 +491,7 @@
             />
           </div>
 
-          <div class="form-group">
-            <label for="apellido">Primer/Segundo Apellido (Persona Natural)</label>
-            <input 
-              id="apellido" 
-              type="text" 
-              class="form-control" 
-              placeholder="Apellidos del tercero" 
-              bind:value={apellido} 
-            />
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h3>Ubicación y Contacto</h3>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="telefono1">Teléfono Principal</label>
-              <input 
-                id="telefono1" 
-                type="text" 
-                class="form-control" 
-                placeholder="Celular/Fijo" 
-                bind:value={telefono1} 
-              />
-            </div>
-            
-            <div class="form-group">
-              <label for="telefono2">Teléfono Alterno</label>
-              <input 
-                id="telefono2" 
-                type="text" 
-                class="form-control" 
-                placeholder="Opcional" 
-                bind:value={telefono2} 
-              />
-            </div>
-          </div>
-
+          <!-- 3. Correo Electrónico (Mandatory) -->
           <div class="form-group">
             <label for="email">Correo Electrónico *</label>
             <input 
@@ -536,60 +503,119 @@
               required
             />
           </div>
+        </div>
 
-          <div class="form-group">
-            <label for="contacto">Contacto de Ruta / Encargado</label>
-            <input 
-              id="contacto" 
-              type="text" 
-              class="form-control" 
-              placeholder="Ej. Conductor, Administrador" 
-              bind:value={contacto} 
-            />
-          </div>
+        <!-- DROPDOWN ACCORDION FOR OPTIONAL FIELDS -->
+        <div class="optional-dropdown-container" style="margin-top: 1.25rem;">
+          <button 
+            type="button" 
+            class="toggle-advanced-btn" 
+            onclick={() => showAdvancedFields = !showAdvancedFields}
+            style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0.75rem 1rem; background: var(--bg-tertiary, #1e293b); border: 1px solid var(--border-color, rgba(255,255,255,0.1)); border-radius: 0.5rem; color: var(--text-primary, #f8fafc); font-weight: 600; cursor: pointer; transition: all 0.2s;"
+          >
+            <span style="display: flex; align-items: center; gap: 0.5rem;">
+              <span>{showAdvancedFields ? '▲' : '▼'}</span>
+              <span>Datos Adicionales del Tercero (Opcional)</span>
+            </span>
+            <span style="font-size: 0.8rem; color: var(--text-secondary, #94a3b8);">
+              {showAdvancedFields ? 'Ocultar campos' : 'Desplegar campos opcionales'}
+            </span>
+          </button>
 
-          <div class="form-group">
-            <label for="direccion1">Dirección</label>
-            <input 
-              id="direccion1" 
-              type="text" 
-              class="form-control" 
-              placeholder="Ej. Calle 10 # 4-50" 
-              bind:value={direccion1} 
-            />
-          </div>
+          {#if showAdvancedFields}
+            <div class="advanced-fields-panel" style="margin-top: 0.75rem; padding: 1rem; background: rgba(0,0,0,0.15); border: 1px dashed rgba(255,255,255,0.15); border-radius: 0.5rem; display: flex; flex-direction: column; gap: 1rem;">
+              
+              <div class="form-group">
+                <label for="apellido">Primer/Segundo Apellido (Persona Natural)</label>
+                <input 
+                  id="apellido" 
+                  type="text" 
+                  class="form-control" 
+                  placeholder="Apellidos del tercero (Opcional)" 
+                  bind:value={apellido} 
+                />
+              </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="ciudad">Ciudad</label>
-              <input 
-                id="ciudad" 
-                type="text" 
-                class="form-control" 
-                placeholder="Ej. Tunja" 
-                bind:value={ciudad} 
-              />
-            </div>
-            
-            <div class="form-group">
-              <label for="departamento">Departamento</label>
-              <input 
-                id="departamento" 
-                type="text" 
-                class="form-control" 
-                placeholder="Ej. Boyacá" 
-                bind:value={departamento} 
-              />
-            </div>
-          </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="telefono1">Teléfono Principal</label>
+                  <input 
+                    id="telefono1" 
+                    type="text" 
+                    class="form-control" 
+                    placeholder="Celular/Fijo (Opcional)" 
+                    bind:value={telefono1} 
+                  />
+                </div>
+                
+                <div class="form-group">
+                  <label for="telefono2">Teléfono Alterno</label>
+                  <input 
+                    id="telefono2" 
+                    type="text" 
+                    class="form-control" 
+                    placeholder="Opcional" 
+                    bind:value={telefono2} 
+                  />
+                </div>
+              </div>
 
-          {#if formMode === 'edit'}
-            <div class="form-group">
-              <label for="status">Estado</label>
-              <select id="status" class="form-control custom-select" bind:value={status}>
-                <option value="A">Activo</option>
-                <option value="I">Inactivo</option>
-              </select>
+              <div class="form-group">
+                <label for="contacto">Contacto de Ruta / Encargado</label>
+                <input 
+                  id="contacto" 
+                  type="text" 
+                  class="form-control" 
+                  placeholder="Ej. Conductor, Administrador (Opcional)" 
+                  bind:value={contacto} 
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="direccion1">Dirección</label>
+                <input 
+                  id="direccion1" 
+                  type="text" 
+                  class="form-control" 
+                  placeholder="Ej. Calle 10 # 4-50 (Opcional)" 
+                  bind:value={direccion1} 
+                />
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="ciudad">Ciudad</label>
+                  <input 
+                    id="ciudad" 
+                    type="text" 
+                    class="form-control" 
+                    placeholder="Ej. Tunja (Opcional)" 
+                    bind:value={ciudad} 
+                  />
+                </div>
+                
+                <div class="form-group">
+                  <label for="departamento">Departamento</label>
+                  <input 
+                    id="departamento" 
+                    type="text" 
+                    class="form-control" 
+                    placeholder="Ej. Boyacá (Opcional)" 
+                    bind:value={departamento} 
+                  />
+                </div>
+              </div>
+
+              {#if formMode === 'edit'}
+                <div class="form-group">
+                  <label for="status">Estado</label>
+                  <select id="status" class="form-control custom-select" bind:value={status}>
+                    <option value="A">Activo</option>
+                    <option value="I">Inactivo</option>
+                  </select>
+                </div>
+              {/if}
+
             </div>
           {/if}
         </div>
