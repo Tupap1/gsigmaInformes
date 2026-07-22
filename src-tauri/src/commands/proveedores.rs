@@ -123,16 +123,12 @@ pub async fn perform_create_proveedor(
 
     let mut tx = db.write_pool.begin().await.map_err(|e| {
         log::error!("Failed to begin transaction: {:?}", e);
-        "Ocurrió un error interno en el servidor.".to_string()
+        format!("Error al iniciar transacción en BD: {}", e)
     })?;
 
-    sqlx::query("SET SESSION sql_mode = 'STRICT_TRANS_TABLES'")
+    let _ = sqlx::query("SET SESSION sql_mode = 'STRICT_TRANS_TABLES'")
         .execute(&mut *tx)
-        .await
-        .map_err(|e| {
-            log::error!("Failed to set STRICT_TRANS_TABLES: {:?}", e);
-            "Ocurrió un error interno en el servidor.".to_string()
-        })?;
+        .await;
 
     let existing_prov: Option<String> =
         sqlx::query_scalar("SELECT PROCOD FROM pv.proveedo WHERE TRIM(PRONUMDOC) = ?")
@@ -141,7 +137,7 @@ pub async fn perform_create_proveedor(
             .await
             .map_err(|e| {
                 log::error!("Error checking duplicate supplier: {:?}", e);
-                "Ocurrió un error interno en el servidor.".to_string()
+                format!("Error al consultar proveedor duplicado: {}", e)
             })?;
 
     if existing_prov.is_some() {
@@ -155,7 +151,7 @@ pub async fn perform_create_proveedor(
             .await
             .map_err(|e| {
                 log::error!("Error checking duplicate third party: {:?}", e);
-                "Ocurrió un error interno en el servidor.".to_string()
+                format!("Error al consultar tercero duplicado: {}", e)
             })?;
 
     let trcid: String;
@@ -194,7 +190,7 @@ pub async fn perform_create_proveedor(
         .await
         .map_err(|e| {
             log::error!("Failed to update existing trc {}: {:?}", trcid, e);
-            "Ocurrió un error interno en el servidor.".to_string()
+            format!("Error al actualizar tercero (adm.trc): {}", e)
         })?;
     } else {
         let prefix = if trimmed_doc.len() >= 5 {
@@ -210,7 +206,7 @@ pub async fn perform_create_proveedor(
                 .await
                 .map_err(|e| {
                     log::error!("Failed to fetch sequence for prefix {}: {:?}", prefix, e);
-                    "Ocurrió un error interno en el servidor.".to_string()
+                    format!("Error al consultar secuencia de proveedor: {}", e)
                 })?;
 
         let mut max_seq: u64 = 0;
@@ -259,7 +255,7 @@ pub async fn perform_create_proveedor(
         .await
         .map_err(|e| {
             log::error!("Failed to insert new trc {}: {:?}", trcid, e);
-            "Ocurrió un error interno en el servidor.".to_string()
+            format!("Error al insertar tercero (adm.trc): {}", e)
         })?;
     }
 
@@ -280,12 +276,12 @@ pub async fn perform_create_proveedor(
     .await
     .map_err(|e| {
         log::error!("Failed to insert into proveedo {}: {:?}", trcid, e);
-        "Ocurrió un error interno en el servidor.".to_string()
+        format!("Error al insertar proveedor (pv.proveedo): {}", e)
     })?;
 
     tx.commit().await.map_err(|e| {
         log::error!("Failed to commit transaction: {:?}", e);
-        "Ocurrió un error interno en el servidor.".to_string()
+        format!("Error al confirmar transacción en BD: {}", e)
     })?;
 
     Ok(trcid)
@@ -308,16 +304,12 @@ pub async fn perform_update_proveedor(
 
     let mut tx = db.write_pool.begin().await.map_err(|e| {
         log::error!("Failed to begin transaction: {:?}", e);
-        "Ocurrió un error interno en el servidor.".to_string()
+        format!("Error al iniciar transacción en BD: {}", e)
     })?;
 
-    sqlx::query("SET SESSION sql_mode = 'STRICT_TRANS_TABLES'")
+    let _ = sqlx::query("SET SESSION sql_mode = 'STRICT_TRANS_TABLES'")
         .execute(&mut *tx)
-        .await
-        .map_err(|e| {
-            log::error!("Failed to set STRICT_TRANS_TABLES: {:?}", e);
-            "Ocurrió un error interno en el servidor.".to_string()
-        })?;
+        .await;
 
     let existing: Option<(String, String)> =
         sqlx::query_as("SELECT PROTIPDOC, PRONUMDOC FROM pv.proveedo WHERE TRIM(PROCOD) = ?")
@@ -326,7 +318,7 @@ pub async fn perform_update_proveedor(
             .await
             .map_err(|e| {
                 log::error!("Error checking supplier existence and document type: {:?}", e);
-                "Ocurrió un error interno en el servidor.".to_string()
+                format!("Error al verificar existencia de proveedor: {}", e)
             })?;
 
     let (tipo_doc, num_doc) = match existing {
@@ -371,7 +363,7 @@ pub async fn perform_update_proveedor(
     .await
     .map_err(|e| {
         log::error!("Failed to update trc {}: {:?}", trimmed_id, e);
-        "Ocurrió un error interno en el servidor.".to_string()
+        format!("Error al actualizar tercero (adm.trc): {}", e)
     })?;
 
     sqlx::query(
@@ -389,12 +381,12 @@ pub async fn perform_update_proveedor(
     .await
     .map_err(|e| {
         log::error!("Failed to update proveedo {}: {:?}", trimmed_id, e);
-        "Ocurrió un error interno en el servidor.".to_string()
+        format!("Error al actualizar proveedor (pv.proveedo): {}", e)
     })?;
 
     tx.commit().await.map_err(|e| {
         log::error!("Failed to commit transaction: {:?}", e);
-        "Ocurrió un error interno en el servidor.".to_string()
+        format!("Error al confirmar transacción en BD: {}", e)
     })?;
 
     Ok(())
