@@ -16,6 +16,28 @@ fn map_or_empty(val: &Option<String>) -> String {
         .unwrap_or_default()
 }
 
+fn map_resp_fisc(val: &Option<String>) -> String {
+    let raw = val.as_deref().unwrap_or("").trim();
+    if raw.is_empty() {
+        "O-99,".to_string()
+    } else if !raw.ends_with(',') {
+        format!("{},", raw)
+    } else {
+        raw.to_string()
+    }
+}
+
+fn map_tax_scheme(val: &Option<String>) -> String {
+    let raw = val.as_deref().unwrap_or("").trim();
+    if raw.is_empty() {
+        "ZZ,".to_string()
+    } else if !raw.ends_with(',') {
+        format!("{},", raw)
+    } else {
+        raw.to_string()
+    }
+}
+
 // core implementation functions to facilitate testing
 pub async fn perform_list_proveedores(
     db: &AppDb,
@@ -38,7 +60,9 @@ pub async fn perform_list_proveedores(
         TRIM(t.TRCTEL2) AS telefono2,
         TRIM(t.TRCDIR1) AS direccion1,
         TRIM(t.TRCCIU) AS ciudad,
-        TRIM(t.TRCDEPA) AS departamento
+        TRIM(t.TRCDEPA) AS departamento,
+        NULL AS resp_fisc,
+        NULL AS tax_scheme
       FROM pv.proveedo p
       INNER JOIN adm.trc t ON p.PROCOD = t.TRCID
     "#,
@@ -78,7 +102,9 @@ pub async fn perform_get_proveedor(db: &AppDb, id: String) -> Result<Proveedor, 
         TRIM(t.TRCTEL2) AS telefono2,
         TRIM(t.TRCDIR1) AS direccion1,
         TRIM(t.TRCCIU) AS ciudad,
-        TRIM(t.TRCDEPA) AS departamento
+        TRIM(t.TRCDEPA) AS departamento,
+        NULL AS resp_fisc,
+        NULL AS tax_scheme
       FROM pv.proveedo p
       INNER JOIN adm.trc t ON p.PROCOD = t.TRCID
       WHERE TRIM(p.PROCOD) = ?
@@ -165,6 +191,8 @@ pub async fn perform_create_proveedor(
     let ciu_upper = map_upper_or_empty(&input.ciudad);
     let dep_upper = map_upper_or_empty(&input.departamento);
     let contacto_upper = map_upper_or_empty(&input.contacto);
+    let resp_fisc_val = map_resp_fisc(&input.resp_fisc);
+    let tax_scheme_val = map_tax_scheme(&input.tax_scheme);
 
     if let Some(trc_id) = existing_trc {
         trcid = trc_id.trim().to_string();
@@ -262,8 +290,8 @@ pub async fn perform_create_proveedor(
     let insert_result = sqlx::query(
         r#"
         INSERT INTO pv.proveedo (
-          PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROPAGCOM, PROFECMOD
-        ) VALUES (?, ?, ?, ?, ?, ?, 'A', 'CO', 'N', CURDATE())
+          PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROPAGCOM, PROFECMOD, respfisc, taxescheme
+        ) VALUES (?, ?, ?, ?, ?, ?, 'A', 'CO', 'N', CURDATE(), ?, ?)
         "#,
     )
     .bind(&trcid)
@@ -272,6 +300,8 @@ pub async fn perform_create_proveedor(
     .bind(tipo_doc)
     .bind(&email_val)
     .bind(&empid)
+    .bind(&resp_fisc_val)
+    .bind(&tax_scheme_val)
     .execute(&mut *tx)
     .await;
 
@@ -638,6 +668,8 @@ mod tests {
             direccion1: Some("Calle Falsa 123".to_string()),
             ciudad: Some("Tunja".to_string()),
             departamento: Some("Boyacá".to_string()),
+            resp_fisc: None,
+            tax_scheme: None,
         };
 
         // 1. Create supplier
@@ -674,6 +706,8 @@ mod tests {
             direccion1: None,
             ciudad: None,
             departamento: None,
+            resp_fisc: None,
+            tax_scheme: None,
         };
         let dup_err = perform_create_proveedor(&db_state, duplicate_input)
             .await
@@ -695,6 +729,8 @@ mod tests {
             ciudad: Some("Duitama".to_string()),
             departamento: Some("Boyacá".to_string()),
             status: Some("A".to_string()),
+            resp_fisc: None,
+            tax_scheme: None,
         };
         perform_update_proveedor(&db_state, created_id.clone(), update_input)
             .await
@@ -770,6 +806,8 @@ mod tests {
             ciudad: after_del.ciudad,
             departamento: after_del.departamento,
             status: Some("A".to_string()),
+            resp_fisc: None,
+            tax_scheme: None,
         };
         perform_update_proveedor(&db_state, prov_id.clone(), restore_input)
             .await

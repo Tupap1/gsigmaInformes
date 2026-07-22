@@ -33,6 +33,28 @@
   let ciudad = $state('');
   let departamento = $state('');
   let status = $state('A');
+  let respFisc = $state('O-99,');
+  let taxScheme = $state('ZZ,');
+  let selectedResponsabilidades = $state<string[]>(['O-99']);
+
+  function toggleResponsabilidad(code: string) {
+    let current = [...selectedResponsabilidades];
+    if (current.includes(code)) {
+      current = current.filter(c => c !== code);
+    } else {
+      if (code === 'O-99') {
+        current = ['O-99'];
+      } else {
+        current = current.filter(c => c !== 'O-99');
+        current.push(code);
+      }
+    }
+    if (current.length === 0) {
+      current = ['O-99'];
+    }
+    selectedResponsabilidades = current;
+    respFisc = current.join(',') + ',';
+  }
 
   // NIT Colombian DV Validation Algorithm (Modulo 11)
   function calculateDV(base: string): number {
@@ -192,6 +214,9 @@
     ciudad = '';
     departamento = '';
     status = 'A';
+    respFisc = 'O-99,';
+    taxScheme = 'ZZ,';
+    selectedResponsabilidades = ['O-99'];
 
     showAdvancedFields = false;
     showFormPanel = true;
@@ -215,6 +240,15 @@
     ciudad = supplier.ciudad || '';
     departamento = supplier.departamento || '';
     status = supplier.status;
+    respFisc = supplier.respFisc || 'O-99,';
+    taxScheme = supplier.taxScheme || 'ZZ,';
+    selectedResponsabilidades = (supplier.respFisc || 'O-99,')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+    if (selectedResponsabilidades.length === 0) {
+      selectedResponsabilidades = ['O-99'];
+    }
 
     showAdvancedFields = false;
     showFormPanel = true;
@@ -271,7 +305,9 @@
           contacto: contacto.trim() || null,
           direccion1: direccion1.trim() || null,
           ciudad: ciudad.trim() || null,
-          departamento: departamento.trim() || null
+          departamento: departamento.trim() || null,
+          respFisc: respFisc || 'O-99,',
+          taxScheme: taxScheme || 'ZZ,'
         };
         const newId = await api.createProveedor(input);
         toasts.success(`Tercero creado con éxito. Código: ${newId}`);
@@ -286,7 +322,9 @@
           direccion1: direccion1.trim() || null,
           ciudad: ciudad.trim() || null,
           departamento: departamento.trim() || null,
-          status: status
+          status: status,
+          respFisc: respFisc || 'O-99,',
+          taxScheme: taxScheme || 'ZZ,'
         };
         await api.updateProveedor(selectedSupplier.id, input);
         toasts.success(`Tercero actualizado con éxito.`);
@@ -603,6 +641,86 @@
                     bind:value={departamento} 
                   />
                 </div>
+              </div>
+
+              <!-- Responsabilidades Fiscales & Tributo DIAN -->
+              <div class="form-group" style="margin-top: 1.25rem;">
+                <label style="font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 0.5rem; color: var(--text-primary);">
+                  Responsabilidades Fiscales DIAN (RUT)
+                </label>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.6rem; padding: 0.85rem; background: var(--bg-card-hover, rgba(0,0,0,0.03)); border: 1px solid var(--border-color); border-radius: 6px;">
+                  <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; cursor: pointer; color: var(--text-primary);">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedResponsabilidades.includes('O-99')}
+                      onchange={() => toggleResponsabilidad('O-99')} 
+                    />
+                    <span><strong>O-99:</strong> No aplica / Otros</span>
+                  </label>
+
+                  <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; cursor: pointer; color: var(--text-primary);">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedResponsabilidades.includes('R-99-PN')}
+                      onchange={() => toggleResponsabilidad('R-99-PN')} 
+                    />
+                    <span><strong>R-99-PN:</strong> No Resp. IVA (Pers. Natural)</span>
+                  </label>
+
+                  <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; cursor: pointer; color: var(--text-primary);">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedResponsabilidades.includes('O-48')}
+                      onchange={() => toggleResponsabilidad('O-48')} 
+                    />
+                    <span><strong>O-48:</strong> Responsable de IVA</span>
+                  </label>
+
+                  <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; cursor: pointer; color: var(--text-primary);">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedResponsabilidades.includes('O-13')}
+                      onchange={() => toggleResponsabilidad('O-13')} 
+                    />
+                    <span><strong>O-13:</strong> Gran Contribuyente</span>
+                  </label>
+
+                  <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; cursor: pointer; color: var(--text-primary);">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedResponsabilidades.includes('O-15')}
+                      onchange={() => toggleResponsabilidad('O-15')} 
+                    />
+                    <span><strong>O-15:</strong> Autorretenedor</span>
+                  </label>
+
+                  <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; cursor: pointer; color: var(--text-primary);">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedResponsabilidades.includes('O-23')}
+                      onchange={() => toggleResponsabilidad('O-23')} 
+                    />
+                    <span><strong>O-23:</strong> Agente de Retención IVA</span>
+                  </label>
+
+                  <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; cursor: pointer; color: var(--text-primary);">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedResponsabilidades.includes('O-47')}
+                      onchange={() => toggleResponsabilidad('O-47')} 
+                    />
+                    <span><strong>O-47:</strong> Régimen Simple Tributación</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top: 0.75rem;">
+                <label for="taxScheme" style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary);">Tributo / Esquema Fiscal DIAN (taxescheme)</label>
+                <select id="taxScheme" class="form-control custom-select" bind:value={taxScheme}>
+                  <option value="ZZ,">ZZ, - No aplica</option>
+                  <option value="01,">01, - IVA (Impuesto sobre las Ventas)</option>
+                  <option value="04,">04, - INC (Impuesto Nacional al Consumo)</option>
+                </select>
               </div>
 
               {#if formMode === 'edit'}

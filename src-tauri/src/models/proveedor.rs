@@ -17,6 +17,8 @@ pub struct Proveedor {
     pub direccion1: Option<String>,
     pub ciudad: Option<String>,
     pub departamento: Option<String>,
+    pub resp_fisc: Option<String>,
+    pub tax_scheme: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -33,6 +35,8 @@ pub struct CreateProveedorInput {
     pub direccion1: Option<String>,
     pub ciudad: Option<String>,
     pub departamento: Option<String>,
+    pub resp_fisc: Option<String>,
+    pub tax_scheme: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -48,6 +52,8 @@ pub struct UpdateProveedorInput {
     pub ciudad: Option<String>,
     pub departamento: Option<String>,
     pub status: Option<String>,
+    pub resp_fisc: Option<String>,
+    pub tax_scheme: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -80,6 +86,8 @@ mod tests {
             direccion1: None,
             ciudad: None,
             departamento: None,
+            resp_fisc: Some("O-99,".to_string()),
+            tax_scheme: Some("ZZ,".to_string()),
         };
 
         let serialized = serde_json::to_string(&p).unwrap();

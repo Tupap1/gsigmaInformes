@@ -15,6 +15,8 @@ export interface Proveedor {
   direccion1: string | null;
   ciudad: string | null;
   departamento: string | null;
+  respFisc: string | null;
+  taxScheme: string | null;
 }
 
 export interface CreateProveedorInput {
@@ -29,6 +31,8 @@ export interface CreateProveedorInput {
   direccion1?: string | null;
   ciudad?: string | null;
   departamento?: string | null;
+  respFisc?: string | null;
+  taxScheme?: string | null;
 }
 
 export interface UpdateProveedorInput {
@@ -42,6 +46,8 @@ export interface UpdateProveedorInput {
   ciudad?: string | null;
   departamento?: string | null;
   status?: string | null;
+  respFisc?: string | null;
+  taxScheme?: string | null;
 }
 
 export interface DeleteResult {
