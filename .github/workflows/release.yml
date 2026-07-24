@@ -24,10 +24,14 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.5
+
       - name: Rust Cache
         uses: swatinem/rust-cache@v2
         with:
           workspaces: "./src-tauri -> target"
+          cache-on-failure: "true"
 
       - name: Install dependencies
         run: npm install
@@ -38,6 +42,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          RUSTC_WRAPPER: "sccache"
         with:
           tagName: v__VERSION__
           releaseName: 'Informes Recicladora v__VERSION__'
