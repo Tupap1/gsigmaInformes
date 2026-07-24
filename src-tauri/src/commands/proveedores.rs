@@ -49,6 +49,34 @@ fn map_tax_scheme(val: &Option<String>) -> String {
     }
 }
 
+fn map_departamento_code(val: &Option<String>) -> String {
+    match val {
+        Some(d) if !d.trim().is_empty() => {
+            let trimmed = d.trim().to_uppercase();
+            if trimmed == "CESAR" {
+                "20".to_string()
+            } else {
+                trimmed
+            }
+        }
+        _ => "20".to_string(), // Default DANE code for Cesar
+    }
+}
+
+fn map_ciudad_code(val: &Option<String>) -> String {
+    match val {
+        Some(c) if !c.trim().is_empty() => {
+            let trimmed = c.trim().to_uppercase();
+            if trimmed == "VALLEDUPAR" {
+                "20001".to_string()
+            } else {
+                trimmed
+            }
+        }
+        _ => "20001".to_string(), // Default DANE code for Valledupar
+    }
+}
+
 #[allow(dead_code)]
 fn pad_right(s: &str, len: usize) -> String {
     let trimmed = s.trim();
@@ -289,8 +317,8 @@ pub async fn perform_create_proveedor(
     let tel2 = map_or_empty(&input.telefono2);
     let email_val = sanitize_email(&input.email);
     let dir1_upper = map_upper_or_empty(&input.direccion1);
-    let ciu_upper = map_upper_or_empty(&input.ciudad);
-    let dep_upper = map_upper_or_empty(&input.departamento);
+    let ciu_upper = map_ciudad_code(&input.ciudad);
+    let dep_upper = map_departamento_code(&input.departamento);
     let contacto_upper = map_upper_or_empty(&input.contacto);
     let resp_fisc_val = map_resp_fisc(&input.resp_fisc);
     let tax_scheme_val = map_tax_scheme(&input.tax_scheme);
@@ -510,8 +538,8 @@ pub async fn perform_update_proveedor(
     let tel2 = map_or_empty(&input.telefono2);
     let email_val = sanitize_email(&input.email);
     let dir1_upper = map_upper_or_empty(&input.direccion1);
-    let ciu_upper = map_upper_or_empty(&input.ciudad);
-    let dep_upper = map_upper_or_empty(&input.departamento);
+    let ciu_upper = map_ciudad_code(&input.ciudad);
+    let dep_upper = map_departamento_code(&input.departamento);
     let contacto_upper = map_upper_or_empty(&input.contacto);
     let resp_fisc_val = map_resp_fisc(&input.resp_fisc);
     let tax_scheme_val = map_tax_scheme(&input.tax_scheme);
