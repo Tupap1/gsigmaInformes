@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*'
 
+env:
+  SCCACHE_DIR: "${{ github.workspace }}/.sccache"
+  RUSTC_WRAPPER: "sccache"
+
 jobs:
   release:
     permissions:
@@ -18,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install Rust
@@ -26,6 +30,14 @@ jobs:
 
       - name: Setup sccache
         uses: mozilla-actions/sccache-action@v0.0.5
+
+      - name: Cache sccache folder
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.sccache
+          key: ${{ runner.os }}-sccache-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-sccache-
 
       - name: Rust Cache
         uses: swatinem/rust-cache@v2
@@ -42,7 +54,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
-          RUSTC_WRAPPER: "sccache"
         with:
           tagName: v__VERSION__
           releaseName: 'Informes Recicladora v__VERSION__'
