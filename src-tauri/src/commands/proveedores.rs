@@ -75,8 +75,8 @@ pub async fn perform_list_proveedores(
         r#"
       SELECT 
         TRIM(p.PROCOD) AS id,
-        TRIM(p.PRONUMDOC) AS num_doc,
-        p.PROTIPDOC AS tipo_doc,
+        IFNULL(NULLIF(TRIM(p.PRONUMDOC), ''), TRIM(t.TRCNUMDOC)) AS num_doc,
+        IFNULL(NULLIF(TRIM(p.PROTIPDOC), ''), TRIM(t.TRCTIPDOC)) AS tipo_doc,
         IFNULL(NULLIF(TRIM(p.PROEMA), ''), NULLIF(TRIM(t.trcema1), '')) AS email,
         TRIM(p.PROCON) AS contacto,
         p.status AS status,
@@ -111,8 +111,8 @@ pub async fn perform_list_proveedores(
                     r#"
                   SELECT 
                     TRIM(p.PROCOD) AS id,
-                    TRIM(p.PRONUMDOC) AS num_doc,
-                    p.PROTIPDOC AS tipo_doc,
+                    IFNULL(NULLIF(TRIM(p.PRONUMDOC), ''), TRIM(t.TRCNUMDOC)) AS num_doc,
+                    IFNULL(NULLIF(TRIM(p.PROTIPDOC), ''), TRIM(t.TRCTIPDOC)) AS tipo_doc,
                     IFNULL(NULLIF(TRIM(p.PROEMA), ''), NULLIF(TRIM(t.trcema1), '')) AS email,
                     TRIM(p.PROCON) AS contacto,
                     'A' AS status,
@@ -153,8 +153,8 @@ pub async fn perform_get_proveedor(db: &AppDb, id: String) -> Result<Proveedor, 
     let query_primary = r#"
       SELECT 
         TRIM(p.PROCOD) AS id,
-        TRIM(p.PRONUMDOC) AS num_doc,
-        p.PROTIPDOC AS tipo_doc,
+        IFNULL(NULLIF(TRIM(p.PRONUMDOC), ''), TRIM(t.TRCNUMDOC)) AS num_doc,
+        IFNULL(NULLIF(TRIM(p.PROTIPDOC), ''), TRIM(t.TRCTIPDOC)) AS tipo_doc,
         IFNULL(NULLIF(TRIM(p.PROEMA), ''), NULLIF(TRIM(t.trcema1), '')) AS email,
         TRIM(p.PROCON) AS contacto,
         p.status AS status,
@@ -186,8 +186,8 @@ pub async fn perform_get_proveedor(db: &AppDb, id: String) -> Result<Proveedor, 
                 let query_fallback = r#"
                   SELECT 
                     TRIM(p.PROCOD) AS id,
-                    TRIM(p.PRONUMDOC) AS num_doc,
-                    p.PROTIPDOC AS tipo_doc,
+                    IFNULL(NULLIF(TRIM(p.PRONUMDOC), ''), TRIM(t.TRCNUMDOC)) AS num_doc,
+                    IFNULL(NULLIF(TRIM(p.PROTIPDOC), ''), TRIM(t.TRCTIPDOC)) AS tipo_doc,
                     IFNULL(NULLIF(TRIM(p.PROEMA), ''), NULLIF(TRIM(t.trcema1), '')) AS email,
                     TRIM(p.PROCON) AS contacto,
                     'A' AS status,
