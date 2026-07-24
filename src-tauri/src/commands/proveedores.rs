@@ -49,6 +49,7 @@ fn map_tax_scheme(val: &Option<String>) -> String {
     }
 }
 
+#[allow(dead_code)]
 fn pad_right(s: &str, len: usize) -> String {
     let trimmed = s.trim();
     if trimmed.len() >= len {
@@ -294,10 +295,6 @@ pub async fn perform_create_proveedor(
     let resp_fisc_val = map_resp_fisc(&input.resp_fisc);
     let tax_scheme_val = map_tax_scheme(&input.tax_scheme);
 
-    // Padding parameters for database compatibility
-    let doc_padded = pad_right(trimmed_doc, 15);
-    let empid_padded = pad_right(&empid, 20);
-
     if let Some(trc_id) = existing_trc {
         trcid = trc_id.trim().to_string();
 
@@ -377,7 +374,7 @@ pub async fn perform_create_proveedor(
         .bind(&tel2)
         .bind(&email_val)
         .bind(tipo_doc)
-        .bind(&doc_padded) // TRCNUMDOC con padding
+        .bind(trimmed_doc) // TRCNUMDOC sin espacios adicionales
         .bind(&dir1_upper)
         .bind(&ciu_upper)
         .bind(trc_nat)
@@ -391,21 +388,19 @@ pub async fn perform_create_proveedor(
         })?;
     }
 
-    let trcid_padded = pad_right(&trcid, 15);
-
     let insert_result = sqlx::query(
         r#"
         INSERT INTO pv.proveedo (
           PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, status, pais, PROPAGCOM, PROFECMOD, PROPLAENT, PROIMPNO, respfisc, taxscheme
-        ) VALUES (?, ?, ?, ?, ?, ?, 'A', 'CO', 'N', CURDATE(), 0, 1, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, 'A', 'CO', 'N', CURDATE(), 1, 1, ?, ?)
         "#,
     )
-    .bind(&trcid_padded)
+    .bind(&trcid)
     .bind(&contacto_upper)
-    .bind(&doc_padded)
+    .bind(trimmed_doc)
     .bind(tipo_doc)
     .bind(&email_val)
-    .bind(&empid_padded)
+    .bind(&empid)
     .bind(&resp_fisc_val)
     .bind(&tax_scheme_val)
     .execute(&mut *tx)
@@ -418,15 +413,15 @@ pub async fn perform_create_proveedor(
                 r#"
                 INSERT INTO pv.proveedo (
                   PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, PROPAGCOM, PROFECMOD, PROPLAENT, PROIMPNO
-                ) VALUES (?, ?, ?, ?, ?, ?, 'N', CURDATE(), 0, 1)
+                ) VALUES (?, ?, ?, ?, ?, ?, 'N', CURDATE(), 1, 1)
                 "#,
             )
-            .bind(&trcid_padded)
+            .bind(&trcid)
             .bind(&contacto_upper)
-            .bind(&doc_padded)
+            .bind(trimmed_doc)
             .bind(tipo_doc)
             .bind(&email_val)
-            .bind(&empid_padded)
+            .bind(&empid)
             .execute(&mut *tx)
             .await;
 
@@ -437,15 +432,15 @@ pub async fn perform_create_proveedor(
                         r#"
                         INSERT INTO pv.proveedo (
                           PROCOD, PROCON, PRONUMDOC, PROTIPDOC, PROEMA, EMPID, PROPAGCOM, PROFECMOD, PROPLAENT, PROIMPNO
-                        ) VALUES (?, ?, ?, ?, ?, ?, 'N', CURDATE(), 0, 1)
+                        ) VALUES (?, ?, ?, ?, ?, ?, 'N', CURDATE(), 1, 1)
                         "#,
                     )
-                    .bind(&trcid_padded)
+                    .bind(&trcid)
                     .bind(&contacto_upper)
-                    .bind(&doc_padded)
+                    .bind(trimmed_doc)
                     .bind(tipo_doc)
                     .bind(&email_val)
-                    .bind(&empid_padded)
+                    .bind(&empid)
                     .execute(&mut *tx)
                     .await
                     .map_err(|e3| format!("Error al insertar proveedor (pv.proveedo): {}", e3))?;
@@ -891,8 +886,8 @@ mod tests {
             "ID does not start with expected prefix"
         );
 
-        // Direct database verification of padding, flags, and types
-        let (raw_procod, raw_pronumdoc, raw_protipdoc, raw_empid, raw_impno, raw_proplaent): (String, String, String, String, u64, f64) = sqlx::query_as(
+        // Direct database verification of flags and types
+        let (raw_procod, raw_pronumdoc, raw_protipdoc, _raw_empid, raw_impno, raw_proplaent): (String, String, String, String, u64, f64) = sqlx::query_as(
             "SELECT PROCOD, PRONUMDOC, PROTIPDOC, EMPID, CAST(PROIMPNO AS UNSIGNED), PROPLAENT FROM pv.proveedo WHERE TRIM(PROCOD) = ?"
         )
         .bind(&created_id)
@@ -900,14 +895,11 @@ mod tests {
         .await
         .unwrap();
 
-        assert_eq!(raw_procod.len(), 15);
-        assert_eq!(raw_procod, format!("{:width$}", created_id, width = 15));
-        assert_eq!(raw_pronumdoc.len(), 15);
-        assert_eq!(raw_pronumdoc, format!("{:width$}", test_doc, width = 15));
+        assert_eq!(raw_procod, created_id);
+        assert_eq!(raw_pronumdoc, test_doc);
         assert_eq!(raw_protipdoc, "N");
-        assert_eq!(raw_empid.len(), 20);
         assert_eq!(raw_impno, 1);
-        assert_eq!(raw_proplaent, 0.0);
+        assert_eq!(raw_proplaent, 1.0);
 
         let (trc_nat, trc_numdoc): (String, String) = sqlx::query_as(
             "SELECT TRCNAT, TRCNUMDOC FROM adm.trc WHERE TRIM(TRCID) = ?"
@@ -918,8 +910,7 @@ mod tests {
         .unwrap();
 
         assert_eq!(trc_nat, "J");
-        assert_eq!(trc_numdoc.len(), 15);
-        assert_eq!(trc_numdoc, format!("{:width$}", test_doc, width = 15));
+        assert_eq!(trc_numdoc, test_doc);
 
         // 2. Fetch and verify
         let fetched = perform_get_proveedor(&db_state, created_id.clone())
